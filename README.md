@@ -1,109 +1,99 @@
 # Microsoft Agent Framework Playground 🧠
 
-*Python + .NET Dual Runtime Edition*
+*Python + .NET Dual Runtime Labs*
 
-A hands-on playground to explore the **Microsoft Agent Framework (MAF)** — Microsoft’s new open-source SDK for building **AI agents and multi-agent workflows**.
+A hands-on playground to explore the **Microsoft Agent Framework (MAF)** — Microsoft’s open-source SDK and runtime for building **AI agents and multi-agent workflows** in **Python and .NET**.
 
-This playground demonstrates both **Python** and **.NET** flavours side-by-side, and how MAF could power **Sentra Brain’s agentic runtime** — from simple chat to multi-agent, fully local orchestration.
-
----
-
-## 🦭 Roadmap
-
-| Phase | Title                        | Description                             |
-| ----- | ---------------------------- | --------------------------------------- |
-| 1     | **Hello Agent**              | Minimal agent example (Python & .NET).  |
-| 2     | **Chat Loop**                | Add context and memory.                 |
-| 3     | **Agentic Loop**             | Implement Sense–Plan–Act–Reflect.       |
-| 4     | **Multi-Agent Workflow**     | Manager–worker collaboration.           |
-| 5     | **Local LLM Integration**    | Use vLLM / Docker Model Runner.         |
-| 6     | **Custom Agents**            | Declarative YAML / JSON definitions.    |
-| 7     | **Visual Workflows**         | DevUI or VSCode visualization.          |
-| 8     | **Sentra Brain Integration** | Connecting MAF runtime to Sentra Brain. |
-
-Each phase has a `python/` and `dotnet/` folder with its own README and runnable code.
+This repository provides parallel examples in both languages to demonstrate how MAF enables **local, offline AI experimentation** using **Docker Model Runner** or other OpenAI-compatible backends.
 
 ---
 
-## 🧱 Directory Overview
+## 🔰 Roadmap
+
+| Phase | Title                         | Goal / Outcome                                                                |
+| ----- | ----------------------------- | ----------------------------------------------------------------------------- |
+| 1     | **The Awakening**             | Minimal offline agent (Python & .NET).                                        |
+| 2     | **Chat Loop**                 | Add conversation context and simple memory.                                   |
+| 3     | **Agentic Loop**              | Demonstrate the Sense → Plan → Act → Reflect cycle.                           |
+| 4     | **Workflows**                 | Build multi-step agent orchestration using MAF graph workflows.               |
+| 5     | **Local LLM Integration**     | Demonstrated: run MAF agents on local models via Docker Model Runner or vLLM. |
+| 6     | **Observability & Logs**      | Add introspection: trace, debug, and visualize agent runs.                    |
+| 7     | **Multi-Agent Collaboration** | Manager–worker coordination patterns using workflow nodes.                    |
+
+Each lab contains Python and .NET implementations for parity and cross-language exploration.
+
+---
+
+## 🛠️ Directory Overview
 
 ```bash
-phases/
-  01_hello_agent/
-    python/ → minimal agent in Python
-    dotnet/ → same logic implemented in C#
-common/
-  docker/ → vLLM or Model Runner setups
-  configs/ → shared YAML agents/workflows
+labs/
+  python/
+    P01_the_awakening/
+      main.py
+      README.md
+    P02_chat_loop/
+  dotnet/
+    P01.TheAwakening/
+      Program.cs
+      Msaf.P01.TheAwakening.csproj
+      README.md
+    P02.ChatLoop
+    Labs.Shared.Utils/
+      Labs.Shared.Utils.csproj
+    MicrosoftAgentFrameworkPlayground.sln
+.env
+requirements.txt
+README.md
 ```
 
 ---
 
-## ⚙️ Quick Start
+## 🔌 Requirements
 
-### Python
-
-```bash
-pip install -r requirements.txt
-python phases/01_hello_agent/python/main.py
-```
-
-### .NET
-
-```bash
-cd phases/01_hello_agent/dotnet
-dotnet run
-```
-
-To run locally with your own model:
-
-```bash
-export OPENAI_API_BASE=http://localhost:1234/v1
-export OPENAI_API_KEY=none
-```
-
-(Use [Docker Model Runner](https://docs.docker.com/desktop/ai/) or vLLM.)
+| Component    | Tooling                                                   |
+| ------------ | --------------------------------------------------------- |
+| Python       | ≥ 3.12 · `pip install agentframework`                     |
+| .NET         | ≥ 10.0 (pre-release) · `dotnet add package Microsoft.AgentFramework` |
+| Local Models | Docker Model Runner / vLLM / llama.server                       |
+| Optional     | `pip install agentframework-devui` (for visualization)    |
 
 ---
 
-## 🧩 Requirements
+## 💬 Current Focus
 
-| Component    | Tooling                                                  |
-| ------------ | -------------------------------------------------------- |
-| Python       | ≥3.10 + `pip install agentframework`                     |
-| .NET         | ≥8.0 SDK + `dotnet add package Microsoft.AgentFramework` |
-| Optional     | `pip install agentframework-devui` (for visualization)   |
-| Local Models | Docker Model Runner / vLLM containers                    |
+The current milestone covers:
 
----
-
-## 🧠 Why Two Flavours?
-
-Sentra Brain runs primarily on Python, but enterprise customers may prefer .NET microservices.
-This playground tests both runtimes, showing **interoperability**, **local deployment**, and **cross-language workflow composition**.
+* Offline execution (local LLMs, no API keys)
+* Conversation context and summarization (WIP)
+* Single-agent reasoning and response streaming
+* Preparing for MAF **workflow orchestration** in upcoming labs
 
 ---
 
-## 🗞️ Article Series
+## 🔍 Upcoming Labs
 
-| # | Title                                | Focus                     |
-| - | ------------------------------------ | ------------------------- |
-| 1 | *Meet Microsoft Agent Framework*     | Overview & setup          |
-| 2 | *Building a Local Chat Agent*        | Chat loop                 |
-| 3 | *Agentic Reasoning with MAF*         | Sense–Plan–Act–Reflect    |
-| 4 | *Multi-Agent Workflows*              | Collaboration             |
-| 5 | *Running MAF Locally*                | vLLM, Docker Model Runner |
-| 6 | *Custom Agents for Private Copilots* | YAML declarative configs  |
-| 7 | *Visualizing Workflows*              | DevUI / VSCode            |
-| 8 | *MAF as Sentra Brain Runtime*        | Integration               |
+* **P03 Agentic Loop:** introduce the reasoning cycle.
+* **P04 Workflows:** explore graph-based orchestration.
+* **P05 Multi-Agent Collaboration:** run manager/worker patterns.
+* **P06 Observability:** logging, tracing, and metrics.
 
 ---
 
-## 🧩 Related Projects
+## 📜 Articles
 
-* [Docker Cagent Playground](https://github.com/juangcarmona/cagent-playground)
-* [Sentra Brain](https://github.com/sentra-brain/sentra-platform)
+| # | Title                                                          | Focus                            |
+| - | -------------------------------------------------------------- | -------------------------------- |
+| 1 | *Microsoft Agent Framework Running Inside Docker Model Runner* | Offline runtime demo             |
+| 2 | *Building a Local Chat Agent*                                  | Memory & context                 |
+| 3 | *Agentic Reasoning with MAF*                                   | Sense–Plan–Act–Reflect           |
+| 4 | *MAF Workflows*                                                | Orchestration & multi-step tasks |
 
 ---
 
-© 2025 Juan G. Carmona · Sentra Brain Playground Series
+### © 2025 Juan G. Carmona - MAF Playground Series
+
+
+
+
+
