@@ -22,7 +22,6 @@ async def main():
     print(f"🧠 Using Microsoft Agent Framework with local model: {model_id}")
     print(f"📡 Endpoint: {base_url}")
 
-    # Instantiate a real MAF ChatAgent
     async with ChatAgent(
         chat_client=OpenAIChatClient(
             base_url=base_url,
