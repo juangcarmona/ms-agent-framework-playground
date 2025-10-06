@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Lab P01 - The Awakening",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/labs/python/01_the_awakening/main.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": true
+    }
+  ]
+}
