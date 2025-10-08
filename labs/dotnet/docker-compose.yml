@@ -1,0 +1,20 @@
+services:
+  msaf02persistence:
+    image: ${DOCKER_REGISTRY-}msaf02persistence
+    build:
+      context: .
+      dockerfile: 02_persistence/Msaf02Persistence/Dockerfile
+  db:
+    image: postgres:18
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: maf
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:

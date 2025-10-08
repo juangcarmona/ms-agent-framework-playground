@@ -1,0 +1,39 @@
+﻿@baseUrl = https://localhost:5001
+@conversationId = {{createConversation.response.body.id}}
+
+### 🟢 Create new conversation
+# @name createConversation
+POST {{baseUrl}}/api/conversations
+Accept: application/json
+Content-Type: application/json
+
+###
+
+### 🟢 Send a message to the conversation
+# @name sendMessage
+POST {{baseUrl}}/api/conversations/{{conversationId}}/messages
+Accept: application/json
+Content-Type: application/json
+
+"Tell me a joke about agents and databases."
+
+###
+
+### List all conversations
+GET {{baseUrl}}/api/conversations
+Accept: application/json
+
+###
+
+### Get details of one conversation
+GET {{baseUrl}}/api/conversations/{{conversationId}}
+Accept: application/json
+
+###
+
+### Stream a conversation (Server-Sent Events)
+POST {{baseUrl}}/api/conversations/{{conversationId}}/stream
+Accept: text/event-stream
+Content-Type: application/json
+
+"Write a haiku about persistence."
