@@ -1,0 +1,11 @@
+services:
+  p01_the_awakening:
+    build: .
+    env_file:
+      - .env
+    models:
+      - gpt-oss
+
+models:
+  gpt-oss:
+    model: ai/gpt-oss

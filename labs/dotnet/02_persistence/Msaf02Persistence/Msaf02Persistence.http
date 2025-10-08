@@ -1,7 +1,7 @@
 ﻿@baseUrl = https://localhost:5001
 @conversationId = {{createConversation.response.body.id}}
 
-### 🟢 Create new conversation
+### Create new conversation
 # @name createConversation
 POST {{baseUrl}}/api/conversations
 Accept: application/json
@@ -9,7 +9,7 @@ Content-Type: application/json
 
 ###
 
-### 🟢 Send a message to the conversation
+### Send a message to the conversation
 # @name sendMessage
 POST {{baseUrl}}/api/conversations/{{conversationId}}/messages
 Accept: application/json
