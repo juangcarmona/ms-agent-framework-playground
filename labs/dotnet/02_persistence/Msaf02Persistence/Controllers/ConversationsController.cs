@@ -1,6 +1,9 @@
-﻿using Application.Models;
-using Application.Services;
+﻿namespace Msaf02Persistence.Controllers;
+
+using Msaf02Persistence.Application.Models;
+using Msaf02Persistence.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Msaf02Persistence.Domain.Repositories;
 
 [ApiController]
 [Route("api/[controller]")]

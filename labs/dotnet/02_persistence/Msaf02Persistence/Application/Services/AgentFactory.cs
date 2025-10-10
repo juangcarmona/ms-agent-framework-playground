@@ -1,44 +1,52 @@
 ﻿using Microsoft.Agents.AI;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using OpenAI;
 using System.ClientModel;
+using Msaf02Persistence.Infrastructure.Data;
+using Application.Settings;
 
-namespace Application.Services;
+namespace Msaf02Persistence.Application.Services;
 
 public sealed class AgentFactory
 {
-    private readonly IConfiguration _config;
+    private readonly OpenAISettings _openai;
+    private readonly AgentsConfig _agents;
     private readonly IDbContextFactory<ConversationDb> _dbFactory;
 
-    private readonly string _model;
-    private readonly string _apiKey;
-    private readonly string _baseUrl;
-
-    public AgentFactory(IConfiguration config, IDbContextFactory<ConversationDb> dbFactory)
+    public AgentFactory(
+        IOptions<OpenAISettings> openai,
+        IOptions<AgentsConfig> agents,
+        IDbContextFactory<ConversationDb> dbFactory)
     {
-        _config = config;
+        _openai = openai.Value;
+        _agents = agents.Value;
         _dbFactory = dbFactory;
-
-        _apiKey = _config["OPENAI_API_KEY"] ?? "none";
-        _baseUrl = _config["OPENAI_API_BASE"] ?? "http://model-runner.docker.internal/engines/llama.cpp/v1";
-        _model = _config["MODEL_ID"] ?? "ai/gpt-oss:latest";
     }
 
-    public AIAgent Create()
+    public AIAgent Create(string key = "Chat")
     {
-        // Initialize OpenAI-compatible client using base URL + key
-        var options = new OpenAIClientOptions { Endpoint = new Uri(_baseUrl) };
-        var credential = new ApiKeyCredential(_apiKey);
+        // Select which agent configuration to use
+        var cfg = key.ToLowerInvariant() switch
+        {
+            "chat" => _agents.Chat,
+            "title-generator" => _agents.TitleGenerator,
+            _ => _agents.Chat
+        };
+
+        // Prepare OpenAI-compatible client
+        var options = new OpenAIClientOptions { Endpoint = new Uri(_openai.BaseUrl) };
+        var credential = new ApiKeyCredential(_openai.ApiKey);
         var client = new OpenAIClient(credential, options);
 
-        // Create the chat client for the selected model
-        var chatClient = client.GetChatClient(_model);
+        // Create chat client using configured model (or fallback)
+        var chatClient = client.GetChatClient(cfg.Model ?? _openai.DefaultModel ?? "ai/gpt-oss:latest");
 
-        // Build agent with persistence via EfChatMessageStore
+        // Build agent with persistence through EfChatMessageStore
         var agent = chatClient.CreateAIAgent(new ChatClientAgentOptions
         {
-            Name = "LocalAssistant",
-            Instructions = "You are a friendly local assistant running fully offline.",
+            Name = key,
+            Instructions = cfg.Instructions ?? "You are a friendly local assistant running fully offline.",
             ChatMessageStoreFactory = ctx =>
                 new EfChatMessageStore(_dbFactory, ctx.SerializedState, ctx.JsonSerializerOptions)
         });

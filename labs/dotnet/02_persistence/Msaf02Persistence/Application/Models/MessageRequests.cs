@@ -1,4 +1,4 @@
-﻿namespace Application.Models;
+﻿namespace Msaf02Persistence.Application.Models;
 
 public class MessageRequest
 {

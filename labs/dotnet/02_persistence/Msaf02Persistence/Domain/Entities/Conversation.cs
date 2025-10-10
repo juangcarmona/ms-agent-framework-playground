@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿namespace Msaf02Persistence.Domain.Entities;
+
+using System.ComponentModel.DataAnnotations;
 
 public class Conversation
 {

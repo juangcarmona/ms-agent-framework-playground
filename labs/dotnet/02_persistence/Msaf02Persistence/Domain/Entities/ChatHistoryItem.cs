@@ -1,4 +1,6 @@
-﻿public sealed class ChatHistoryItem
+﻿namespace Msaf02Persistence.Domain.Entities;
+
+public sealed class ChatHistoryItem
 {
     public long Id { get; set; }
     public string? Key { get; set; }

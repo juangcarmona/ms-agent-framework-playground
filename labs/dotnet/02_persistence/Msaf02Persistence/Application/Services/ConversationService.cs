@@ -1,11 +1,16 @@
-﻿using Application.Services;
-using Microsoft.Agents.AI;
+﻿using Microsoft.Agents.AI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using Msaf02Persistence.Domain.Entities;
+using Msaf02Persistence.Infrastructure.Data;
+using Msaf02Persistence.Domain.Repositories;
+using Application.Settings;
+
+namespace Msaf02Persistence.Application.Services;
 
 public sealed class ConversationService
 {

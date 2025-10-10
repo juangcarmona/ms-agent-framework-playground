@@ -1,4 +1,7 @@
-﻿using Application.Services;
+﻿using Msaf02Persistence.Application.Services;
+using Application.Settings;
+using Msaf02Persistence.Infrastructure.Data;
+using Msaf02Persistence.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +23,8 @@ builder.Services.AddScoped<ConversationRepository>();
 // ------------------------------------------------------------
 // Application layer
 // ------------------------------------------------------------
+builder.Services.Configure<OpenAISettings>(builder.Configuration.GetSection("OpenAI"));
+builder.Services.Configure<AgentsConfig>(builder.Configuration.GetSection("Agents"));
 builder.Services.AddSingleton<AgentFactory>();
 builder.Services.AddScoped<ConversationService>();
 builder.Services.AddControllers();

@@ -1,5 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Msaf02Persistence.Infrastructure.Data;
+
+namespace Msaf02Persistence.Infrastructure.Data;
 
 public sealed class ConversationDbFactory : IDesignTimeDbContextFactory<ConversationDb>
 {

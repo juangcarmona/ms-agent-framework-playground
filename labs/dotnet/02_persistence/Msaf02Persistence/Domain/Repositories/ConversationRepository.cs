@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿namespace Msaf02Persistence.Domain.Repositories;
+
+using Microsoft.EntityFrameworkCore;
+using Msaf02Persistence.Domain.Entities;
+using Msaf02Persistence.Infrastructure.Data;
 
 public class ConversationRepository
 {

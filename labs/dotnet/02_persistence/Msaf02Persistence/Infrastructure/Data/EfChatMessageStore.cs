@@ -1,6 +1,9 @@
-﻿using Microsoft.Agents.AI;
+﻿namespace Msaf02Persistence.Infrastructure.Data;
+
+using Microsoft.Agents.AI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
+using Msaf02Persistence.Domain.Entities;
 using System.Text.Json;
 
 internal sealed class EfChatMessageStore : ChatMessageStore
@@ -68,5 +71,5 @@ internal sealed class EfChatMessageStore : ChatMessageStore
     public override JsonElement Serialize(JsonSerializerOptions? jsonSerializerOptions = null) =>
         JsonSerializer.SerializeToElement(ThreadDbKey);
 
-   
+
 }
