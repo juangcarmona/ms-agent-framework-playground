@@ -1,6 +1,7 @@
 ﻿using Application.Services;
 using Microsoft.Agents.AI;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.AI;
 using OpenAI;
 using System.Runtime.CompilerServices;
@@ -106,40 +107,26 @@ public sealed class ConversationService
 
     private static string? TryExtractThreadKey(string threadJson)
     {
-        if (string.IsNullOrWhiteSpace(threadJson)) return null;
+        if (string.IsNullOrWhiteSpace(threadJson))
+            return null;
 
         try
         {
             using var doc = JsonDocument.Parse(threadJson);
-            if (FindThreadKey(doc.RootElement, out var key))
-                return key;
+            var root = doc.RootElement;
+
+            if (root.ValueKind == JsonValueKind.Object)
+            {
+                if (root.TryGetProperty("storeState", out var v) && v.ValueKind == JsonValueKind.String)
+                    return v.GetString();
+            }
         }
-        catch { }
+        catch
+        {
+            // ignore malformed JSON
+        }
 
         return null;
-
-        static bool FindThreadKey(JsonElement e, out string? key)
-        {
-            key = null;
-            switch (e.ValueKind)
-            {
-                case JsonValueKind.Object:
-                    foreach (var p in e.EnumerateObject())
-                    {
-                        if (p.NameEquals("threadKey") && p.Value.ValueKind == JsonValueKind.String)
-                        {
-                            key = p.Value.GetString();
-                            return !string.IsNullOrEmpty(key);
-                        }
-                        if (FindThreadKey(p.Value, out key)) return true;
-                    }
-                    break;
-                case JsonValueKind.Array:
-                    foreach (var i in e.EnumerateArray())
-                        if (FindThreadKey(i, out key)) return true;
-                    break;
-            }
-            return false;
-        }
     }
+
 }

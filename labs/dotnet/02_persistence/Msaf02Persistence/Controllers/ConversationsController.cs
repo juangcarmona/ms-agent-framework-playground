@@ -32,6 +32,35 @@ public class ConversationsController : ControllerBase
         return Ok(c);
     }
 
+    [HttpGet("{id}/messages")]
+    public async Task<IActionResult> GetMessages(Guid id, CancellationToken ct)
+    {
+        try
+        {
+            var (meta, msgs) = await _conversationService.GetConversationAsync(id, ct);
+            var result = msgs.Select(m => new
+            {
+                role = m.Role.ToString(),
+                author = m.AuthorName,
+                createdAt = m.CreatedAt,
+                content = m.Text,
+                messageId = m.MessageId
+            });
+            return Ok(new
+            {
+                conversationId = meta.Id,
+                title = meta.Title,
+                createdAt = meta.CreatedAt,
+                messages = result
+            });
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { error = "Conversation not found" });
+        }
+    }
+
+
     [HttpPost("{id}/messages")]
     public async Task<IActionResult> Send(Guid id, [FromBody] MessageRequest request)
     {

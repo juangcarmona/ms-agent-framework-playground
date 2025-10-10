@@ -24,18 +24,22 @@ internal sealed class EfChatMessageStore : ChatMessageStore
         ThreadDbKey ??= Guid.NewGuid().ToString("N");
         await using var db = await _dbFactory.CreateDbContextAsync(ct);
 
+        var now = DateTimeOffset.UtcNow;
+
         foreach (var m in messages)
         {
-            var id = string.IsNullOrEmpty(m.MessageId) ? Guid.NewGuid().ToString("N") : m.MessageId;
+            m.AuthorName ??= m.Role == ChatRole.User ? "User" : "Assistant";
+            m.CreatedAt ??= now;
+            m.MessageId ??= Guid.NewGuid().ToString("N");
+
             db.ChatHistory.Add(new ChatHistoryItem
             {
                 ThreadId = ThreadDbKey,
-                Key = $"{ThreadDbKey}-{id}",
-                Timestamp = DateTimeOffset.UtcNow,
+                Key = $"{ThreadDbKey}-{m.MessageId}",
+                Timestamp = m.CreatedAt.Value,
                 SerializedMessage = JsonSerializer.Serialize(m),
                 MessageText = m.Text
             });
-            ;
         }
 
         await db.SaveChangesAsync(ct);
@@ -54,7 +58,7 @@ internal sealed class EfChatMessageStore : ChatMessageStore
             .Take(10)
             .ToListAsync(ct);
 
-        records.Reverse(); // chronological order
+        records.Reverse();
 
         return records
             .Select(x => JsonSerializer.Deserialize<ChatMessage>(x.SerializedMessage!)!)
