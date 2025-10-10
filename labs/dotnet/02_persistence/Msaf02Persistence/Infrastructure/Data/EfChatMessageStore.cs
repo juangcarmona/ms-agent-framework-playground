@@ -70,6 +70,4 @@ internal sealed class EfChatMessageStore : ChatMessageStore
 
     public override JsonElement Serialize(JsonSerializerOptions? jsonSerializerOptions = null) =>
         JsonSerializer.SerializeToElement(ThreadDbKey);
-
-
 }

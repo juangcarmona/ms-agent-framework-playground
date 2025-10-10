@@ -1,14 +1,10 @@
 ﻿using Microsoft.Agents.AI;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.AI;
-using OpenAI;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Msaf02Persistence.Domain.Entities;
 using Msaf02Persistence.Infrastructure.Data;
-using Msaf02Persistence.Domain.Repositories;
-using Application.Settings;
 
 namespace Msaf02Persistence.Application.Services;
 
@@ -16,11 +12,17 @@ public sealed class ConversationService
 {
     private readonly IDbContextFactory<ConversationDb> _dbFactory;
     private readonly AgentFactory _agentFactory;
+    private readonly ConversationTitleService _titleService;
+    private const string DefaultTitle = "New conversation";
 
-    public ConversationService(IDbContextFactory<ConversationDb> dbFactory, AgentFactory agentFactory)
+    public ConversationService(
+        IDbContextFactory<ConversationDb> dbFactory,
+        AgentFactory agentFactory,
+        ConversationTitleService titleService)
     {
         _dbFactory = dbFactory;
         _agentFactory = agentFactory;
+        _titleService = titleService;
     }
 
     public async Task<Conversation> CreateConversationAsync(string? title = null)
@@ -28,7 +30,7 @@ public sealed class ConversationService
         await using var db = await _dbFactory.CreateDbContextAsync();
         var conv = new Conversation
         {
-            Title = title ?? "New conversation",
+            Title = title ?? DefaultTitle,
             CreatedAt = DateTime.UtcNow,
             ThreadJson = "{}"
         };
@@ -43,29 +45,35 @@ public sealed class ConversationService
         var conv = await db.Conversations.FirstOrDefaultAsync(x => x.Id == conversationId)
                    ?? throw new KeyNotFoundException("Conversation not found");
 
-        var agent = _agentFactory.Create();
+        // Fire-and-forget background title generation.
+        // This runs asynchronously and is intentionally not awaited.
+        _ = _titleService.GenerateIfNeededAsync(conversationId, userInput);
 
-        AgentThread thread = string.IsNullOrWhiteSpace(conv.ThreadJson) || conv.ThreadJson == "{}"
+        var agent = _agentFactory.Create();
+        var thread = string.IsNullOrWhiteSpace(conv.ThreadJson) || conv.ThreadJson == "{}"
             ? agent.GetNewThread()
             : agent.DeserializeThread(JsonSerializer.Deserialize<JsonElement>(conv.ThreadJson!));
 
         var run = await agent.RunAsync(userInput, thread);
-        var serialized = thread.Serialize();
-        conv.ThreadJson = JsonSerializer.Serialize(serialized);
+        conv.ThreadJson = JsonSerializer.Serialize(thread.Serialize());
         await db.SaveChangesAsync();
 
         return run.Text ?? string.Empty;
     }
 
     public async IAsyncEnumerable<string> StreamMessageAsync(
-        Guid conversationId, string userInput, [EnumeratorCancellation] CancellationToken ct = default)
+           Guid conversationId, string userInput, [EnumeratorCancellation] CancellationToken ct = default)
     {
         await using var db = await _dbFactory.CreateDbContextAsync(ct);
         var conv = await db.Conversations.FirstOrDefaultAsync(x => x.Id == conversationId, ct)
                    ?? throw new KeyNotFoundException("Conversation not found");
 
+        // Fire-and-forget background title generation.
+        // This runs asynchronously and is intentionally not awaited.
+        _ = _titleService.GenerateIfNeededAsync(conversationId, userInput);
+
         var agent = _agentFactory.Create();
-        AgentThread thread = string.IsNullOrWhiteSpace(conv.ThreadJson) || conv.ThreadJson == "{}"
+        var thread = string.IsNullOrWhiteSpace(conv.ThreadJson) || conv.ThreadJson == "{}"
             ? agent.GetNewThread()
             : agent.DeserializeThread(JsonSerializer.Deserialize<JsonElement>(conv.ThreadJson!));
 
@@ -76,11 +84,10 @@ public sealed class ConversationService
                 yield return text;
         }
 
-        var serialized = thread.Serialize();
-        conv.ThreadJson = JsonSerializer.Serialize(serialized);
+        conv.ThreadJson = JsonSerializer.Serialize(thread.Serialize());
         await db.SaveChangesAsync(ct);
     }
-
+    
     public async Task<(Conversation Meta, IReadOnlyList<ChatMessage> Messages)> GetConversationAsync(
         Guid id, CancellationToken ct = default)
     {
@@ -88,14 +95,11 @@ public sealed class ConversationService
         var conv = await db.Conversations.FirstOrDefaultAsync(x => x.Id == id, ct)
                    ?? throw new KeyNotFoundException("Conversation not found");
 
-        // Extract the thread key stored inside ThreadJson
         var threadKey = TryExtractThreadKey(conv.ThreadJson);
 
         List<ChatMessage> msgs = new();
         if (!string.IsNullOrEmpty(threadKey))
         {
-            // The EfChatMessageStore writes ChatHistoryItem entries.
-            // Each item holds the full serialized ChatMessage.
             var items = await db.ChatHistory
                 .Where(x => x.ThreadId == threadKey)
                 .OrderBy(x => x.Timestamp)
@@ -134,4 +138,20 @@ public sealed class ConversationService
         return null;
     }
 
+    public async Task DeleteConversationAsync(Guid id)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync();
+        var conv = await db.Conversations.FirstOrDefaultAsync(x => x.Id == id);
+        if (conv == null)
+            throw new KeyNotFoundException("Conversation not found");
+        var threadKey = TryExtractThreadKey(conv.ThreadJson);
+        if (!string.IsNullOrEmpty(threadKey))
+        {
+            var messages = db.ChatHistory.Where(x => x.ThreadId == threadKey);
+            db.ChatHistory.RemoveRange(messages);
+        }
+
+        db.Conversations.Remove(conv);
+        await db.SaveChangesAsync();
+    }
 }

@@ -10,8 +10,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Infrastructure: Database + Repositories
 // ------------------------------------------------------------
 var conn = builder.Configuration.GetConnectionString("DefaultConnection");
-Console.WriteLine($"🔌 Connection: {conn ?? "NULL"}");
-
 builder.Services.AddDbContextFactory<ConversationDb>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -26,6 +24,7 @@ builder.Services.AddScoped<ConversationRepository>();
 builder.Services.Configure<OpenAISettings>(builder.Configuration.GetSection("OpenAI"));
 builder.Services.Configure<AgentsConfig>(builder.Configuration.GetSection("Agents"));
 builder.Services.AddSingleton<AgentFactory>();
+builder.Services.AddScoped<ConversationTitleService>();
 builder.Services.AddScoped<ConversationService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

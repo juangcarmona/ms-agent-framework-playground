@@ -110,4 +110,17 @@ public class ConversationsController : ControllerBase
         }
     }
 
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
+        {
+            await _conversationService.DeleteConversationAsync(id);
+            return NoContent();
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { error = "Conversation not found" });
+        }
+    }
 }
