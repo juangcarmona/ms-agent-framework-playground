@@ -1,72 +1,145 @@
-﻿using Application.Models;
-using Application.Services;
+﻿using Application.Services;
+using Microsoft.Agents.AI;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.AI;
+using OpenAI;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 
-public class ConversationService
+public sealed class ConversationService
 {
-    private readonly ConversationRepository _repo;
-    private readonly AgentService _agent;
+    private readonly IDbContextFactory<ConversationDb> _dbFactory;
+    private readonly AgentFactory _agentFactory;
 
-    public ConversationService(ConversationRepository repo, AgentService agent)
+    public ConversationService(IDbContextFactory<ConversationDb> dbFactory, AgentFactory agentFactory)
     {
-        _repo = repo;
-        _agent = agent;
+        _dbFactory = dbFactory;
+        _agentFactory = agentFactory;
     }
 
-    /// <summary>
-    /// Creates a new conversation and returns a DTO with its ID and initial state.
-    /// </summary>
-    public async Task<CreateConversationResult> CreateConversationAsync(string? title = null)
+    public async Task<Conversation> CreateConversationAsync(string? title = null)
     {
-        var conversation = new Conversation
+        await using var db = await _dbFactory.CreateDbContextAsync();
+        var conv = new Conversation
         {
-            Title = title ?? "New Conversation",
+            Title = title ?? "New conversation",
             CreatedAt = DateTime.UtcNow,
-            ThreadJson = "{}" // Empty thread
+            ThreadJson = "{}"
         };
-
-        var created = await _repo.CreateAsync(conversation);
-
-        return new CreateConversationResult
-        {
-            ConversationId = created.Id,
-            Title = created.Title,
-            CreatedAt = created.CreatedAt
-        };
+        db.Conversations.Add(conv);
+        await db.SaveChangesAsync();
+        return conv;
     }
 
-    public async Task<ConversationResult> SendMessageAsync(Guid conversationId, string input)
+    public async Task<string> SendMessageAsync(Guid conversationId, string userInput)
     {
-        var conversation = await _repo.GetAsync(conversationId)
-            ?? throw new KeyNotFoundException("Conversation not found");
+        await using var db = await _dbFactory.CreateDbContextAsync();
+        var conv = await db.Conversations.FirstOrDefaultAsync(x => x.Id == conversationId)
+                   ?? throw new KeyNotFoundException("Conversation not found");
 
-        // Persist user message
-        conversation.Messages.Add(new Message { ConversationId = conversationId, Role = "user", Content = input });
+        var agent = _agentFactory.Create();
 
-        // Run agent
-        var (response, threadJson) = await _agent.RunAsync(input, conversation.ThreadJson);
+        AgentThread thread = string.IsNullOrWhiteSpace(conv.ThreadJson) || conv.ThreadJson == "{}"
+            ? agent.GetNewThread()
+            : agent.DeserializeThread(JsonSerializer.Deserialize<JsonElement>(conv.ThreadJson!));
 
-        // Persist assistant message + new thread
-        conversation.ThreadJson = threadJson;
-        conversation.Messages.Add(new Message { ConversationId = conversationId, Role = "assistant", Content = response });
-        await _repo.UpdateAsync(conversation);
+        var run = await agent.RunAsync(userInput, thread);
+        var serialized = thread.Serialize();
+        conv.ThreadJson = JsonSerializer.Serialize(serialized);
+        await db.SaveChangesAsync();
 
-        return new ConversationResult(conversation.Id, response);
+        return run.Text ?? string.Empty;
     }
 
-    public async IAsyncEnumerable<string> StreamMessageAsync(Guid conversationId, string input)
+    public async IAsyncEnumerable<string> StreamMessageAsync(
+        Guid conversationId, string userInput, [EnumeratorCancellation] CancellationToken ct = default)
     {
-        var conversation = await _repo.GetAsync(conversationId)
-            ?? throw new KeyNotFoundException("Conversation not found");
+        await using var db = await _dbFactory.CreateDbContextAsync(ct);
+        var conv = await db.Conversations.FirstOrDefaultAsync(x => x.Id == conversationId, ct)
+                   ?? throw new KeyNotFoundException("Conversation not found");
 
-        conversation.Messages.Add(new Message { ConversationId = conversationId, Role = "user", Content = input });
-        await _repo.UpdateAsync(conversation);
+        var agent = _agentFactory.Create();
+        AgentThread thread = string.IsNullOrWhiteSpace(conv.ThreadJson) || conv.ThreadJson == "{}"
+            ? agent.GetNewThread()
+            : agent.DeserializeThread(JsonSerializer.Deserialize<JsonElement>(conv.ThreadJson!));
 
-        // yield chunks as they arrive
-        await foreach (var chunk in _agent.RunStreamingAsync(input, conversation.ThreadJson))
+        await foreach (var update in agent.RunStreamingAsync(userInput, thread, cancellationToken: ct))
         {
-            yield return chunk;
+            var text = update.Text;
+            if (!string.IsNullOrEmpty(text))
+                yield return text;
         }
 
-        // Optionally capture full assistant text at end if you buffer it
+        var serialized = thread.Serialize();
+        conv.ThreadJson = JsonSerializer.Serialize(serialized);
+        await db.SaveChangesAsync(ct);
+    }
+
+    public async Task<(Conversation Meta, IReadOnlyList<ChatMessage> Messages)> GetConversationAsync(
+        Guid id, CancellationToken ct = default)
+    {
+        await using var db = await _dbFactory.CreateDbContextAsync(ct);
+        var conv = await db.Conversations.FirstOrDefaultAsync(x => x.Id == id, ct)
+                   ?? throw new KeyNotFoundException("Conversation not found");
+
+        // Extract the thread key stored inside ThreadJson
+        var threadKey = TryExtractThreadKey(conv.ThreadJson);
+
+        List<ChatMessage> msgs = new();
+        if (!string.IsNullOrEmpty(threadKey))
+        {
+            // The EfChatMessageStore writes ChatHistoryItem entries.
+            // Each item holds the full serialized ChatMessage.
+            var items = await db.ChatHistory
+                .Where(x => x.ThreadId == threadKey)
+                .OrderBy(x => x.Timestamp)
+                .ToListAsync(ct);
+
+            // Deserialize back into ChatMessage for API response
+            msgs = items
+                .Select(x => JsonSerializer.Deserialize<ChatMessage>(x.SerializedMessage!)!)
+                .ToList();
+        }
+
+        return (conv, msgs);
+    }
+
+    private static string? TryExtractThreadKey(string threadJson)
+    {
+        if (string.IsNullOrWhiteSpace(threadJson)) return null;
+
+        try
+        {
+            using var doc = JsonDocument.Parse(threadJson);
+            if (FindThreadKey(doc.RootElement, out var key))
+                return key;
+        }
+        catch { }
+
+        return null;
+
+        static bool FindThreadKey(JsonElement e, out string? key)
+        {
+            key = null;
+            switch (e.ValueKind)
+            {
+                case JsonValueKind.Object:
+                    foreach (var p in e.EnumerateObject())
+                    {
+                        if (p.NameEquals("threadKey") && p.Value.ValueKind == JsonValueKind.String)
+                        {
+                            key = p.Value.GetString();
+                            return !string.IsNullOrEmpty(key);
+                        }
+                        if (FindThreadKey(p.Value, out key)) return true;
+                    }
+                    break;
+                case JsonValueKind.Array:
+                    foreach (var i in e.EnumerateArray())
+                        if (FindThreadKey(i, out key)) return true;
+                    break;
+            }
+            return false;
+        }
     }
 }

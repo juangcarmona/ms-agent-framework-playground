@@ -9,17 +9,18 @@ var builder = WebApplication.CreateBuilder(args);
 var conn = builder.Configuration.GetConnectionString("DefaultConnection");
 Console.WriteLine($"🔌 Connection: {conn ?? "NULL"}");
 
-builder.Services.AddDbContext<ConversationDb>(options =>
+builder.Services.AddDbContextFactory<ConversationDb>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
 
 builder.Services.AddScoped<ConversationRepository>();
 
 // ------------------------------------------------------------
 // Application layer
 // ------------------------------------------------------------
-builder.Services.AddSingleton<AgentService>();
+builder.Services.AddSingleton<AgentFactory>();
 builder.Services.AddScoped<ConversationService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -46,6 +47,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
-app.UseAuthorization();
+// app.UseAuthorization();
 app.MapControllers();
 app.Run();

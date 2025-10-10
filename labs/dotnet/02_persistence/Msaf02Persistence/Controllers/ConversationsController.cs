@@ -1,4 +1,5 @@
-﻿using Application.Services;
+﻿using Application.Models;
+using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -32,11 +33,11 @@ public class ConversationsController : ControllerBase
     }
 
     [HttpPost("{id}/messages")]
-    public async Task<IActionResult> Send(Guid id, [FromBody] string input)
+    public async Task<IActionResult> Send(Guid id, [FromBody] MessageRequest request)
     {
         try
         {
-            var response = await _conversationService.SendMessageAsync(id, input);
+            var response = await _conversationService.SendMessageAsync(id, request.Content);
             return Ok(new { response });
         }
         catch (KeyNotFoundException)
@@ -46,14 +47,35 @@ public class ConversationsController : ControllerBase
     }
 
     [HttpPost("{id}/stream")]
-    public async Task Stream(Guid id, [FromBody] string input)
+    public async Task Stream(Guid id, [FromBody] MessageRequest request)
     {
-        Response.Headers.Add("Content-Type", "text/event-stream");
+        Response.Headers.Append("Content-Type", "text/event-stream");
+        Response.Headers.Append("Cache-Control", "no-cache");
+        Response.Headers.Append("Connection", "keep-alive");
 
-        await foreach (var chunk in _conversationService.StreamMessageAsync(id, input))
+        try
         {
-            await Response.WriteAsync($"data: {chunk}\n\n");
+            await foreach (var chunk in _conversationService.StreamMessageAsync(id, request.Content))
+            {
+                // SSE events must start with "data:" and end with double newlines
+                await Response.WriteAsync($"data: {chunk}\n\n");
+                await Response.Body.FlushAsync();
+            }
+
+            // Signal end of stream
+            await Response.WriteAsync("event: end\n\n");
             await Response.Body.FlushAsync();
         }
+        catch (KeyNotFoundException)
+        {
+            Response.StatusCode = StatusCodes.Status404NotFound;
+            await Response.WriteAsync("event: error\ndata: Conversation not found\n\n");
+        }
+        catch (Exception ex)
+        {
+            Response.StatusCode = StatusCodes.Status500InternalServerError;
+            await Response.WriteAsync($"event: error\ndata: {ex.Message}\n\n");
+        }
     }
+
 }

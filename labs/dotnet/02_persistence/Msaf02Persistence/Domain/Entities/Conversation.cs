@@ -7,5 +7,4 @@ public class Conversation
     public string Title { get; set; } = "New conversation";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public string ThreadJson { get; set; } = "{}";
-    public List<Message> Messages { get; set; } = new();
 }

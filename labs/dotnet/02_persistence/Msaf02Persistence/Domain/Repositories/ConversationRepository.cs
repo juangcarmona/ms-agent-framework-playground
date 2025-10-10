@@ -13,10 +13,10 @@ public class ConversationRepository
     }
 
     public async Task<IEnumerable<Conversation>> GetAllAsync() =>
-        await _db.Conversations.Include(x => x.Messages).ToListAsync();
+        await _db.Conversations.ToListAsync();
 
     public async Task<Conversation?> GetAsync(Guid id) =>
-        await _db.Conversations.Include(x => x.Messages).FirstOrDefaultAsync(x => x.Id == id);
+        await _db.Conversations.FirstOrDefaultAsync(x => x.Id == id);
 
     public async Task UpdateAsync(Conversation c)
     {
