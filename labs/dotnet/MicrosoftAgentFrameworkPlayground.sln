@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Msaf02Persistence", "02_per
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LAB 03", "LAB 03", "{EF95119C-0EEB-43B9-B623-2F1CC426F333}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Msaf03Spar", "03_spar\Msaf03Spar\Msaf03Spar.csproj", "{84241C6A-122F-4682-92B9-31CDA367503F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +41,10 @@ Global
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84241C6A-122F-4682-92B9-31CDA367503F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84241C6A-122F-4682-92B9-31CDA367503F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84241C6A-122F-4682-92B9-31CDA367503F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84241C6A-122F-4682-92B9-31CDA367503F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,6 +52,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F3EBCA37-B4E2-7867-008D-B244C3E2AD90} = {74415DCE-128B-418C-BD75-323FB5585776}
 		{EA23581D-D4EA-429D-AD1C-0F3C01155A94} = {B532AE38-2E75-4F03-A071-6F9359D8D163}
+		{84241C6A-122F-4682-92B9-31CDA367503F} = {EF95119C-0EEB-43B9-B623-2F1CC426F333}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D61996C3-8C54-4310-BC55-9FD6374B3806}

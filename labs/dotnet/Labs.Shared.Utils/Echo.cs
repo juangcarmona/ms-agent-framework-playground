@@ -15,6 +15,7 @@ namespace Labs.Shared.Utils
         public static void User(string text, bool nl = true) => Write("🧑:", text, ConsoleColor.Yellow, nl);
         public static void Agent(string text, bool nl = true) => Write("🤖:", text, ConsoleColor.Green, nl);
         public static void Warn(string text, bool nl = true) => Write("⚠:", text, ConsoleColor.Magenta, nl);
+        public static void Step(string text, bool nl = true) => Write("✔:", text, ConsoleColor.DarkYellow, nl);
         public static void Error(string text, bool nl = true) => Write("⛔:", text, ConsoleColor.Red, nl);
         public static void Done(string text, bool nl = true) => Write("✅:", text, ConsoleColor.Cyan, nl);
 
