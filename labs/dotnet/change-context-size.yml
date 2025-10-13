@@ -1,0 +1,12 @@
+version: "2"
+agents:
+  root:
+    model: gpt-oss
+    description: Dummy agent to set new context size globally
+    instruction: Adjusting model context window
+models:
+  gpt-oss:
+    provider: dmr
+    model: ai/gpt-oss
+    base_url: http://localhost:12434/engines/llama.cpp/v1
+    max_tokens: 64000

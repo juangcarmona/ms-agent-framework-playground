@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Msaf03Spar": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

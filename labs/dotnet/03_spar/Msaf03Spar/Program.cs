@@ -22,9 +22,11 @@ var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>(optional: true)
     .Build();
 
-var baseUrl = config["OPENAI_API_BASE"] ?? "http://localhost:12434/engines/llama.cpp/v1";
 var apiKey = config["OPENAI_API_KEY"] ?? "none";
-var modelId = config["MODEL_ID"] ?? "ai/gpt-oss:latest";
+var baseUrl = config["OPENAI_API_BASE"] ?? "http://localhost:12434/engines/llama.cpp/v1";
+var modelId = config["MODEL_ID"] ?? "ai/gpt-oss";
+//var baseUrl = config["OPENAI_API_BASE"] ?? "http://model-runner.docker.internal/engines/llama.cpp/v1";
+//var modelId = config["MODEL_ID"] ?? "ai/qwen3:14B-Q6_K";
 
 Echo.System($"Endpoint   : {baseUrl}");
 Echo.System($"Model     : {modelId}");
@@ -103,88 +105,23 @@ var thread = agent.GetNewThread();
 //  4.  Interactive Streaming Run with Event Logging
 // ────────────────────────────────────────────────────────────────
 Echo.User("Tell me what you want to research :");
-var query = Console.ReadLine() ?? "Docker Model Runner and Microsoft Agent Framework";
+var query = Console.ReadLine();
+if (query == string.Empty)
+{
+
+    query =  "I need you to combine MAF, " + 
+             "brand new Microsoft Agent Framework," +
+             "with DMR, Docker Model Runner. " +
+             "Is it possible to merge both? Generate a " + 
+             "recipe for an experiment of but with .NET";
+    Echo.User(query);
+}
 
 Echo.System($"Running agentic loop for '{query}' …\n");
+await Echo.StreamAgentAsync(agent.RunStreamingAsync(query, thread));
 
-var finalText = new System.Text.StringBuilder();
+Echo.Done("Reasoning cycle complete");
+Echo.System("Press any key to exit …");
+Console.ReadKey();
 
-await foreach (var update in agent.RunStreamingAsync(query, thread))
-{
-    // 1) Aggregate text deltas
-    if (!string.IsNullOrEmpty(update.Text))
-    {
-        Echo.Agent(update.Text);
-        finalText.Append(update.Text);
-    }
-
-    // 2) Inspect contents
-    if (update.Contents is { Count: > 0 })
-    {
-        foreach (var content in update.Contents)
-        {
-            switch (content)
-            {
-                case FunctionCallContent call:
-                    string argText = call.Arguments is null
-                        ? ""
-                        : string.Join(" ", call.Arguments.Select(kv => $"{kv.Key}={FormatArg(kv.Value)}"));
-                    Echo.Step($"[ACT] {call.Name} {argText}");
-                    break;
-
-                case FunctionResultContent result:
-                    string preview = ToPreview(result.Result);
-                    Echo.System($"[TOOL] {result.CallId} → {preview}");
-                    break;
-
-                case TextContent t:
-                    Echo.Agent(t.Text);
-                    finalText.Append(t.Text);
-                    break;
-
-                default:
-                    Echo.Warn($"[?] Unhandled content type: {content.GetType().Name}");
-                    break;
-            }
-        }
-    }
-}
-
-// 3) After streaming ends, output the reflection/summary
-Echo.Done("✅ Reasoning cycle complete");
-
-Echo.Step("🔁 Reflecting on gathered information…");
-
-var prompt = "Now summarize the findings you just gathered in a concise paragraph, highlighting key points and their relationship.";
-   
-await Echo.StreamAgentAsync(agent.RunStreamingAsync(prompt, thread));
-
-
-
-// ────────────────────────────────────────────────────────────────
-//  Helper functions (keep in same file below your top-level code)
-// ────────────────────────────────────────────────────────────────
-static string FormatArg(object? value)
-{
-    if (value is null) return "null";
-    return value switch
-    {
-        string s => s,
-        bool b => b.ToString().ToLowerInvariant(),
-        int or long or double or float or decimal => Convert.ToString(value, System.Globalization.CultureInfo.InvariantCulture) ?? "",
-        _ => JsonSerializer.Serialize(value)
-    };
-}
-
-static string ToPreview(object? resultObj, int max = 240)
-{
-    if (resultObj is null) return "(null)";
-    string s = resultObj switch
-    {
-        string str => str,
-        BinaryData bd => bd.ToString(),
-        _ => JsonSerializer.Serialize(resultObj)
-    };
-    return s.Length > max ? s[..max] + "…" : s;
-}
 

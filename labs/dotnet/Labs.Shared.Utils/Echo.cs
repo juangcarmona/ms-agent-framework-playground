@@ -1,5 +1,8 @@
 ﻿using Microsoft.Agents.AI;
+using Microsoft.Extensions.AI;
+using System.Globalization;
 using System.Text;
+using System.Text.Json;
 
 namespace Labs.Shared.Utils
 {
@@ -20,30 +23,81 @@ namespace Labs.Shared.Utils
         public static void Done(string text, bool nl = true) => Write("✅:", text, ConsoleColor.Cyan, nl);
 
         /// <summary>
-        /// Streams agent output token by token, keeping formatting clean.
+        /// Streams an agent run and narrates each content type appropriately.
+        /// Handles text, reasoning, tool calls, tool results, and unknown items.
         /// </summary>
         public static async Task StreamAgentAsync(IAsyncEnumerable<AgentRunResponseUpdate> updates)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("🤖: ");
+            bool inAgentLine = false;
 
             await foreach (var update in updates)
             {
+              
                 if (!string.IsNullOrEmpty(update.Text))
+                {
+                    if (!inAgentLine)
+                    {
+                        Console.ResetColor();
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write("🤖: ");
+                        inAgentLine = true;
+                    }
                     Console.Write(update.Text);
+                    continue;
+                }
+
+                if (update.Contents is not { Count: > 0 })
+                    continue;
+
+                if (inAgentLine)
+                {
+                    Console.WriteLine();
+                    Console.ResetColor();
+                    inAgentLine = false;
+                }
+
+                foreach (var content in update.Contents)
+                {
+                    Console.ResetColor();   
+                    switch (content)
+                    {
+                        case TextReasoningContent reasoning:
+                            Step($"[THINK] {reasoning.Text}");
+                            break;
+                        case FunctionCallContent call:
+                            string argText = call.Arguments is null
+                                ? ""
+                                : string.Join(" ",
+                                    call.Arguments.Select(kv => $"{kv.Key}={FormatArg(kv.Value)}"));
+                            Step($"[ACT] {call.Name} {argText}");
+                            break;
+                        case FunctionResultContent result:
+                            string preview = ToPreview(result.Result);
+                            System($"[TOOL] {result.CallId} → {preview}");
+                            break;
+                        case TextContent text:
+                            Agent(text.Text);
+                            break;
+                        default:                           
+                            break;
+                    }
+                }
             }
 
-            Console.WriteLine();
-            Console.ResetColor();
+            if (inAgentLine)
+            {
+                Console.WriteLine();
+                Console.ResetColor();
+            }
         }
+
+
 
         private static void Write(string symbol, string msg, ConsoleColor color, bool nl)
         {
             Console.OutputEncoding = Encoding.UTF8;
             Console.ForegroundColor = color;
-
             Console.Write($"{symbol} ");
-
             if (nl) Console.WriteLine(msg);
             else Console.Write(msg);
             Console.ResetColor();
@@ -54,6 +108,31 @@ namespace Labs.Shared.Utils
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine(new string(c, len));
             Console.ResetColor();
+        }
+
+        private static string FormatArg(object? value)
+        {
+            if (value is null) return "null";
+            return value switch
+            {
+                string s => s,
+                bool b => b.ToString().ToLowerInvariant(),
+                int or long or double or float or decimal =>
+                    Convert.ToString(value, CultureInfo.InvariantCulture) ?? "",
+                _ => JsonSerializer.Serialize(value)
+            };
+        }
+
+        private static string ToPreview(object? resultObj, int max = 240)
+        {
+            if (resultObj is null) return "(null)";
+            string s = resultObj switch
+            {
+                string str => str,
+                BinaryData bd => bd.ToString(),
+                _ => JsonSerializer.Serialize(resultObj)
+            };
+            return s.Length > max ? s[..max] + "…" : s;
         }
     }
 }
