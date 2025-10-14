@@ -10,6 +10,16 @@
       "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.env",
       "justMyCode": true
+    },
+    {
+      "name": "Lab P03 - SPAR",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/labs/python/03_spar/main.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": true  
     }
   ]
 }
