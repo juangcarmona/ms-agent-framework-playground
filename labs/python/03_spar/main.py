@@ -1,5 +1,5 @@
 """
-Lab P03 - Agentic Reasoning 🧩
+Lab P03 - Agentic Reasoning (SPAR)
 Sense → Plan → Act → Reflect using Microsoft Agent Framework for Python
 with Docker Model Runner (LLM backend) + Hosted MCP tools (DuckDuckGo / Fetch).
 
@@ -9,13 +9,10 @@ Prereqs:
 
 import asyncio, os
 from dotenv import load_dotenv
-from agent_framework import ChatAgent, HostedMCPTool, MCPStdioTool
+from agent_framework import ChatAgent, MCPStdioTool
 from agent_framework.openai import OpenAIChatClient
 from echo import Echo
 
-# ───────────────────────────────
-# 1. Environment + Client
-# ───────────────────────────────
 load_dotenv()
 Echo.info("Lab P03 - Agentic Reasoning (Sense → Plan → Act → Reflect)")
 
@@ -28,9 +25,6 @@ Echo.system(f"Model    : {model_id}")
 
 chat_client = OpenAIChatClient(base_url=base_url, api_key=api_key, model_id=model_id)
 
-# ───────────────────────────────
-# 3. Agent Definition (SPAR loop)
-# ───────────────────────────────
 instructions = """
 You are a self-sufficient research agent.
 When the user asks about a topic:
@@ -41,11 +35,6 @@ When the user asks about a topic:
 Explain your reasoning briefly before the final answer.
 """
 
-
-
-# ───────────────────────────────
-# 4. Interactive Run (Stream)
-# ───────────────────────────────
 async def main():
     Echo.step("🔧 Initializing Hosted MCP tools …")
 
