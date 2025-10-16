@@ -84,10 +84,13 @@ The current milestone covers:
 
 | # | Title                                                          | Focus                            |
 | - | -------------------------------------------------------------- | -------------------------------- |
-| 1 | *Microsoft Agent Framework Running Inside Docker Model Runner* | Offline runtime demo             |
-| 2 | *Building a Local Chat Agent*                                  | Memory & context                 |
-| 3 | *Agentic Reasoning with MAF*                                   | Sense–Plan–Act–Reflect           |
-| 4 | *MAF Workflows*                                                | Orchestration & multi-step tasks |
+| 1 | *[Microsoft Agent Framework Running Inside Docker Model Runner](https://jgcarmona.com/run-agent-framework-locally/)* | Offline runtime demo             |
+| 2 | *[Building a Local Chat Agent](https://jgcarmona.com/building-local-chat-agent-microsoft-agent-framework-dotnet/)*                                  | Memory & context                 |
+| 3 | *[Agentic Reasoning with MAF](https://jgcarmona.com/agentic-reasoning-with-microsoft-agent-framework/)*                                   | Sense–Plan–Act–Reflect           |
+| 4 | *[MAF + DevUI + Docker MCP Gateway](https://jgcarmona.com/maf-devui-docker-mcp-gateway-dmr/)*                             | DevUI + MCP intro (and workarounds) |
+| 5 | *MAF Workflows*                                                | Orchestration & multi-step tasks |
+
+
 
 ---
 
