@@ -1,0 +1,11 @@
+services:
+  gateway:
+    image: docker/mcp-gateway:latest
+    command:
+      - --servers=duckduckgo,fetch
+      - --transport=streaming
+      - --port=8811
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8811:8811"

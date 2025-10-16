@@ -20,6 +20,16 @@
       "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.env",
       "justMyCode": true  
+    },
+    {
+      "name": "Lab P04 - DevUI + Docker MCP Gateway",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/labs/python/04_devui_with_mcp/main.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": true  
     }
   ]
 }
