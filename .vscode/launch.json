@@ -40,6 +40,17 @@
       "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.env",
       "justMyCode": true  
+    },
+    {
+      "name": "Lab P05 - Workflows Demo Console",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/labs/python/05_workflows_demo/console.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": true,
+      "args": ["--wf", "SearchWithCheckpoint"]
     }
   ]
 }

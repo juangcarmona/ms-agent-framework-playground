@@ -94,4 +94,5 @@ def build_search_and_summarize_workflow(factory: AgentFactory):
         .add_edge(fetcher, summarizer)
         .build()
     )
+    workflow.id = "SearchAndSummarize"
     return workflow

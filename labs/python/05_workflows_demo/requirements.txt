@@ -1,0 +1,9 @@
+agent-framework
+aiofiles
+alembic
+asyncpg
+markdownify
+mcp
+python-dotenv
+SQLAlchemy[asyncio]
+uvicorn[standard]

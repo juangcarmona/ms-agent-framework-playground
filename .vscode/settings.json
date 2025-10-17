@@ -9,6 +9,16 @@
             "name": "MAF02",
             "database": "maf",
             "username": "postgres"
+        },
+        {
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "maf",
+            "database": "maf",
+            "username": "postgres"
         }
     ]
 }

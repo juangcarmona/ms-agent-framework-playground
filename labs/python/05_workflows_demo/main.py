@@ -6,13 +6,10 @@ import asyncio
 import uvicorn
 
 from agents import AgentFactory
+from persistence.checkpoint_storage_factory import CheckpointStorageFactory
 from tools import mcp_tools
 from tools.mcp_gateway_client import MCPGatewayClient
-
-from workflows.wf01_basic_sequence import build_basic_sequence_workflow
-from workflows.wf02_sequential_executors import  build_sequential_executors_workflow
-from workflows.wf03_search_and_summarize import build_search_and_summarize_workflow
-
+from workflows.workflow_factory import WorkflowFactory
 
 async def main():
     
@@ -24,18 +21,18 @@ async def main():
     # Make it available to all MCP tools
     mcp_tools.init_mcp_client(mcp_client)
 
-    # Initialize and register all agents
+    # Init
     factory = AgentFactory().init_defaults()
+    storage_factory = CheckpointStorageFactory()
+    checkpoint_storage = await storage_factory.init_postgres()
 
-    # Build workflows
-    wf01 = build_basic_sequence_workflow() 
-    wf02 = build_sequential_executors_workflow(factory)
-    wf03 = build_search_and_summarize_workflow(factory)
+    # Build all workflows
+    wf_factory = WorkflowFactory(factory, checkpoint_storage).init_defaults()
 
-    # Register workflows in DevUI
+    # Register in DevUI
     server = DevServer(host=DEVUI_HOST, port=DEVUI_PORT, ui_enabled=True)
-    server.register_entities([*factory.all(), wf01, wf02, wf03])
-
+    server.register_entities([*factory.all(), *wf_factory.all()])
+    
     # Start DevUI server
     app = server.get_app()
 
