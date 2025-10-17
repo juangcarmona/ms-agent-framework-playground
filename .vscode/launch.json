@@ -30,6 +30,16 @@
       "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.env",
       "justMyCode": true  
+    },
+    {
+      "name": "Lab P05 - Workflows Demo",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/labs/python/05_workflows_demo/main.py",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "justMyCode": true  
     }
   ]
 }

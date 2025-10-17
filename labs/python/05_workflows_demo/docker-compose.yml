@@ -1,0 +1,22 @@
+services:
+  gateway:
+    image: docker/mcp-gateway:latest
+    command:
+      - --servers=duckduckgo,fetch
+      - --transport=streaming
+      - --port=8811
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8811:8811"
+  # db:
+  #   image: postgres:18
+  #   restart: always
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: maf
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
