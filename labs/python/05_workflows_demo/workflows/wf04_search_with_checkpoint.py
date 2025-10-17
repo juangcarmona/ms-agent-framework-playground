@@ -1,4 +1,3 @@
-from email.mime import message
 import logging
 from dataclasses import dataclass
 from agent_framework import (
@@ -71,8 +70,10 @@ class ApprovalGateway(Executor):
 
     @handler
     async def ask_human(self, message: ChatMessage, ctx: WorkflowContext[HumanApprovalRequest]):
-        shared = await ctx.get_shared_state() or {}  
-        preview = (shared.get("fetched_text") or message.text or "")[:400]
+        """Ask a human whether to proceed, showing a preview of the fetched text."""
+        fetched_text = (await ctx.get_shared_state("fetched_text")) or (message.text or "")
+        fetched_text = fetched_text.strip()
+        preview = fetched_text[:400]
         await ctx.set_state({"last_preview_len": len(preview)})
 
         req = HumanApprovalRequest(
@@ -87,12 +88,15 @@ class ApprovalGateway(Executor):
         feedback: RequestResponse[HumanApprovalRequest, str],
         ctx: WorkflowContext[ChatMessage],
     ):
+        """Handle human response and route accordingly."""
         reply = (feedback.data or "").strip().lower()
         logger.info("[ApprovalGateway] Human replied: %s", reply)
 
         if reply == "yes":
-            # Forward to summarizer
-            await ctx.send_message(ChatMessage(role="user", text="Proceed with full report"), target_id=self._next_id)
+            await ctx.send_message(
+                ChatMessage(role="user", text="Proceed with full report"),
+                target_id=self._next_id,
+            )
         else:
             await ctx.yield_output("Human declined to continue.")
 
@@ -106,13 +110,14 @@ class SummarizerExecutor(Executor):
 
     @handler
     async def handle(self, message: ChatMessage, ctx: WorkflowContext[str]):
-        shared = await ctx.get_shared_state() or {}
-        fetched_text = shared.get("fetched_text", "")
-        if fetched_text:
-            # Combine the human approval message with fetched content
-            combined = f"{message.text}\n\n---\n{fetched_text}"
-        else:
-            combined = message.text
+        fetched_text = (await ctx.get_shared_state("fetched_text")) or (message.text or "")
+        fetched_text = fetched_text.strip()
+
+        combined = (
+            f"{message.text}\n\n---\n{fetched_text}"
+            if fetched_text
+            else message.text
+        )
 
         response = await self.agent.run([ChatMessage(role="user", text=combined)])
         result = (response.text or "").strip()

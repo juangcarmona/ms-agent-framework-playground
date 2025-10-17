@@ -144,30 +144,30 @@ async def main():
     parser = argparse.ArgumentParser(description="Run a workflow in console mode (with HITL support).")
     parser.add_argument("--wf", required=True, help="Workflow ID to run (e.g., SearchWithCheckpoint)")
     parser.add_argument("--resume", help="Optional checkpoint ID to resume from")
-    parser.add_argument("--input", help="Optional initial user input text", default="Research Docker MCP Gateway")
+    parser.add_argument("--input", help="Optional initial user input text", default="Join Microsoft Agent Framework With Docker Model Runner")
     args = parser.parse_args()
 
-    # 1️⃣ Initialize MCP + Agents
+    # Initialize MCP + Agents
     mcp_client = MCPGatewayClient(MCP_GATEWAY_URL)
     await mcp_client.connect()
     await mcp_client.list_tools()
     mcp_tools.init_mcp_client(mcp_client)
 
-    # Init
-    agent_factory = AgentFactory().init_defaults()
-    storage_factory = CheckpointStorageFactory()
-    checkpoint_storage = await storage_factory.init_postgres()
-
-    wf_factory = WorkflowFactory(agent_factory, checkpoint_storage).init_defaults()
-
-    # Pick workflow by ID
-    workflow = wf_factory.get(args.wf)
-
-    # 4️⃣ Run or resume
-    if args.resume:
-        await resume_from_checkpoint(workflow, checkpoint_storage, args.resume)
-    else:
-        await run_interactive(workflow, args.input)
+    try:
+        # Initialize factories
+        agent_factory = AgentFactory().init_defaults()
+        storage_factory = CheckpointStorageFactory()
+        checkpoint_storage = await storage_factory.init_postgres()
+        # Build workflows
+        wf_factory = WorkflowFactory(agent_factory, checkpoint_storage).init_defaults()
+        workflow = wf_factory.get(args.wf)
+        
+        if args.resume:
+            await resume_from_checkpoint(workflow, checkpoint_storage, args.resume)
+        else:
+            await run_interactive(workflow, args.input)
+    finally:
+        await mcp_client.close()
 
 
 if __name__ == "__main__":
