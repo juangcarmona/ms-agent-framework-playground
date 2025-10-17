@@ -5,6 +5,11 @@ from .summarizer_agent import build_summarizer_agent
 from .search_agent import build_search_agent
 from .fetch_agent import build_fetch_agent
 from .title_generator_agent import build_title_generator_agent
+from .pure_fetch_agent import build_pure_fetch_agent
+from .markdown_summarizer_agent import build_markdown_summarizer_agent
+from .research_aggregator_agent import build_research_aggregator_agent
+from .folder_manager_agent import build_folder_manager_agent
+from .collector_agent import build_collector_agent
 
 from config import OPENAI_API_BASE, OPENAI_API_KEY, MODEL_ID
 
@@ -33,6 +38,11 @@ class AgentFactory:
             "SearchAgent": build_search_agent,
             "FetchAgent": build_fetch_agent,
             "TitleGeneratorAgent": build_title_generator_agent,
+            "PureFetcherAgent": build_pure_fetch_agent,
+            "MarkdownSummarizerAgent": build_markdown_summarizer_agent,
+            "ResearchAggregatorAgent": build_research_aggregator_agent,   
+            "FolderManagerAgent": build_folder_manager_agent,
+            "CollectorAgent": build_collector_agent,
         }
         for name, builder in builders.items():
             agent = builder(self._client)

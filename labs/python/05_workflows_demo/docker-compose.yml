@@ -2,13 +2,21 @@ services:
   gateway:
     image: docker/mcp-gateway:latest
     command:
-      - --servers=duckduckgo,fetch
+      - --servers=duckduckgo,fetch,filesystem
       - --transport=streaming
       - --port=8811
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8811:8811"
+  filesystem:
+    image: mcp/filesystem:latest
+    environment:
+      - MCP_SERVER_NAME=filesystem
+    volumes:
+      - X:\repos\ms-agent-framework-playground:/mnt
+    ports:
+      - "8813:8080"
   db:
     image: postgres:18
     container_name: maf_postgres

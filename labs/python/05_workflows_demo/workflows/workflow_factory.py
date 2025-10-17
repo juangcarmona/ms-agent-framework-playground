@@ -11,6 +11,7 @@ from .wf01_basic_sequence import build_basic_sequence_workflow
 from .wf02_sequential_executors import build_sequential_executors_workflow
 from .wf03_search_and_summarize import build_search_and_summarize_workflow
 from .wf04_search_with_checkpoint import build_search_with_checkpoint_workflow
+from .wf05_research_collector import build_research_collector_workflow
 
 logger = logging.getLogger("maf.workflow_factory")
 
@@ -35,6 +36,9 @@ class WorkflowFactory:
             "SequentialExecutors": lambda: build_sequential_executors_workflow(self._agent_factory),
             "SearchAndSummarize": lambda: build_search_and_summarize_workflow(self._agent_factory),
             "SearchWithCheckpoint": lambda: build_search_with_checkpoint_workflow(
+                self._agent_factory, self._checkpoint_storage
+            ),
+            "ResearchCollector": lambda: build_research_collector_workflow(
                 self._agent_factory, self._checkpoint_storage
             ),
         }

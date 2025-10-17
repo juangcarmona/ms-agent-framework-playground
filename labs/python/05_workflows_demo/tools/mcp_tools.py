@@ -33,3 +33,21 @@ async def fetch_webpage(
         return await mcp_client.call_tool("fetch_content", {"url": url})
     except Exception:
         return await mcp_client.call_tool("fetch", {"url": url})
+    
+async def create_directory(path: str):
+    if not mcp_client or not mcp_client.session:
+        raise RuntimeError("MCP client not initialized")
+    return await mcp_client.call_tool("create_directory", {"path": path})
+
+
+async def list_directory(path: str):
+    if not mcp_client or not mcp_client.session:
+        raise RuntimeError("MCP client not initialized")
+    return await mcp_client.call_tool("list_directory", {"path": path})
+
+
+async def write_file(path: str, content: str):
+    if not mcp_client or not mcp_client.session:
+        raise RuntimeError("MCP client not initialized")
+    return await mcp_client.call_tool("write_file", {"path": path, "content": content})
+
