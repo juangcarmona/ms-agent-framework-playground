@@ -10,7 +10,8 @@ def build_markdown_summarizer_agent(chat_client):
             "- The original URL in the first line.\n"
             "- A '# TL;DR' section giving a deep, factual summary for later reuse.\n"
             "- Followed by the cleaned or reformatted content as markdown.\n"
-            "Avoid hallucination; retain facts."
+            "Avoid hallucination; retain facts. If information is missing, note it explicitly.\n"
+            " - Content must be in Markdown format with appropriate headings, lists, and code blocks.\n"
         ),
         chat_client=chat_client,
     )

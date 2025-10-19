@@ -10,6 +10,10 @@ from .markdown_summarizer_agent import build_markdown_summarizer_agent
 from .research_aggregator_agent import build_research_aggregator_agent
 from .folder_manager_agent import build_folder_manager_agent
 from .collector_agent import build_collector_agent
+from .sys_exec_agent import build_sys_exec_agent
+from .file_organizer_agent import build_file_organizer_agent
+from .system_inspector_agent import build_system_inspector_agent
+from .dev_helper_agent import build_dev_helper_agent
 
 from config import OPENAI_API_BASE, OPENAI_API_KEY, MODEL_ID
 
@@ -43,6 +47,10 @@ class AgentFactory:
             "ResearchAggregatorAgent": build_research_aggregator_agent,   
             "FolderManagerAgent": build_folder_manager_agent,
             "CollectorAgent": build_collector_agent,
+            "SysExecAgent": build_sys_exec_agent,
+            "FileOrganizerAgent": build_file_organizer_agent,
+            "SystemInspectorAgent": build_system_inspector_agent,
+            "DevHelperAgent": build_dev_helper_agent,
         }
         for name, builder in builders.items():
             agent = builder(self._client)

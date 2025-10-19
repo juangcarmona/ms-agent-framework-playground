@@ -11,6 +11,9 @@
 *.sln.docstates
 *.venv
 
+# mnt/ and subfolders, created during debuging or workflows execution
+mnt/ 
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

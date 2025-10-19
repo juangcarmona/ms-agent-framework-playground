@@ -1,22 +1,36 @@
+version: "3.9"
+
 services:
+  # filesystem:
+  #   image: mcp/filesystem:latest
+  #   container_name: mcp_filesystem
+  #   # mount host folder X:\mnt into container as /projects/mnt
+  #   volumes:
+  #     - "X:/mnt:/projects/mnt:rw"
+  #   # command: pass the root path(s) that the server allows
+  #   command: [ "/projects/mnt" ]
+  #   # environment or other flags if needed
+  #   # optionally restrict to read-only: use :ro instead of :rw
+  #   # restart policy optional
+  #   restart: unless-stopped
+
   gateway:
-    image: docker/mcp-gateway:latest
-    command:
-      - --servers=duckduckgo,fetch,filesystem
-      - --transport=streaming
-      - --port=8811
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+    image: docker/mcp-gateway    
+    container_name: mcp_gateway
     ports:
       - "8811:8811"
-  filesystem:
-    image: mcp/filesystem:latest
-    environment:
-      - MCP_SERVER_NAME=filesystem
     volumes:
-      - X:\repos\ms-agent-framework-playground:/mnt
-    ports:
-      - "8813:8080"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "~/.docker/mcp:/mcp"
+    command:
+      - --catalog=/mcp/catalogs/docker-mcp.yaml
+      - --config=/mcp/config.yaml
+      - --registry=/mcp/registry.yaml
+      - --secrets=docker-desktop
+      - --watch=true
+      - --transport=streaming
+      - --port=8811
+
   db:
     image: postgres:18
     container_name: maf_postgres

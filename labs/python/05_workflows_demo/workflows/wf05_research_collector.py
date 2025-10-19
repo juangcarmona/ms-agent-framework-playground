@@ -18,6 +18,7 @@ class InputToChat(Executor):
     @handler
     async def start(self, text: str, ctx: WorkflowContext[ChatMessage]):
         logger.info("[InputToChat] user input: %s", text)
+        await ctx.set_shared_state("user_query", text)
         await ctx.send_message(ChatMessage(role="user", text=text))
 
 
@@ -31,7 +32,8 @@ class TitleGeneratorExecutor(Executor):
 
     @handler
     async def handle(self, message: ChatMessage, ctx: WorkflowContext[ChatMessage]):
-        response = await self.agent.run([message])
+        user_query = await ctx.get_shared_state("user_query")
+        response = await self.agent.run([ChatMessage(role="user", text=user_query)])
         title = (response.text or "untitled").strip()
         await ctx.set_shared_state("research_title", title)
         logger.info("[TitleGenerator] Generated title: %s", title)
@@ -52,9 +54,9 @@ class FolderCreatorExecutor(Executor):
         response = await self.agent.run([
             ChatMessage(role="user", text=f"Create a folder for: {title}")
         ])
-        folder_path = (response.text or "./research/unknown").strip()
+        folder_path = response.text.strip()
         await ctx.set_shared_state("folder_path", folder_path)
-        logger.info("[FolderCreator] Folder created: %s", folder_path)
+        logger.info("[FolderCreator] Folder created at: %s", folder_path)
         await ctx.send_message(ChatMessage(role="assistant", text=folder_path))
 
 
@@ -68,7 +70,10 @@ class SearchExecutor(Executor):
 
     @handler
     async def handle(self, message: ChatMessage, ctx: WorkflowContext[ChatMessage]):
-        response = await self.agent.run([message])
+        title = await ctx.get_shared_state("research_title")
+        response = await self.agent.run([
+            ChatMessage(role="user", text=f"Search for the topic: {title}")
+        ])
         urls = [u for u in (response.text or "").split() if u.startswith("http")]
         await ctx.set_shared_state("search_results", urls[:10])
         logger.info("[SearchExecutor] Found %d URLs", len(urls[:10]))
@@ -86,19 +91,21 @@ class CollectorExecutor(Executor):
     @handler
     async def handle(self, message: ChatMessage, ctx: WorkflowContext[ChatMessage]):
         urls = await ctx.get_shared_state("search_results") or []
-        folder = await ctx.get_shared_state("folder_path") or "./research/tmp"
+        folder = await ctx.get_shared_state("folder_path")
+        if not urls:
+            logger.warning("[Collector] No URLs found, skipping.")
+            return
 
-        # The agent does: fetch each URL → summarize → write markdown files
         prompt = (
-            f"You have a folder '{folder}'. For each of these URLs:\n"
-            + "\n".join(urls)
-            + "\nFetch their content, summarize deeply into Markdown (with TL;DR), and save each file there."
+            f"Store Markdown summaries for these URLs into folder:\n{folder}\n\n"
+            f"URLs:\n" + "\n".join(urls) +
+            "\nEach summary must include a # TL;DR section."
         )
         response = await self.agent.run([ChatMessage(role="user", text=prompt)])
         summary_index = (response.text or "").strip()
         await ctx.set_shared_state("summary_index", summary_index)
         logger.info("[Collector] Finished processing all URLs.")
-        await ctx.send_message(ChatMessage(role="assistant", text="All pages processed."))
+        await ctx.send_message(ChatMessage(role="assistant", text="All pages processed and saved."))
 
 
 # ------------------------------------------------------------
@@ -112,9 +119,13 @@ class FolderSummarizerExecutor(Executor):
     @handler
     async def handle(self, message: ChatMessage, ctx: WorkflowContext[str]):
         folder = await ctx.get_shared_state("folder_path")
-        prompt = f"Read the TL;DR sections from all Markdown files in {folder} and synthesize a global summary."
+        prompt = (
+            f"Read all Markdown files from folder:\n{folder}\n"
+            "Extract the '# TL;DR' sections and produce a unified research summary."
+        )
         response = await self.agent.run([ChatMessage(role="user", text=prompt)])
         result = (response.text or "").strip()
+        await ctx.set_shared_state("final_summary", result)
         await ctx.yield_output(result)
         logger.info("[FolderSummarizer] Global synthesis produced (%d chars)", len(result))
 

@@ -1,5 +1,6 @@
 from agent_framework import ChatAgent
-from tools.mcp_tools import fetch_webpage, write_file
+from tools.mcp_tools import fetch_webpage
+from tools.filesystem import write_file
 
 def build_collector_agent(chat_client):
     """
