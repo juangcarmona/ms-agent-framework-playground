@@ -1,3 +1,12 @@
+"""
+Workflow with sequential executors wrapping different agents.
+Each executor processes the output of the previous one.
+
+Agents used:
+- GeneralAgent  --> Answer general queries
+- SummarizerAgent --> Summarize the final response
+"""
+
 from agent_framework import (
     ChatMessage,
     Executor,

@@ -9,9 +9,13 @@ from persistence.checkpoint_storage_factory import CheckpointStorageFactory
 # Import builders
 from .wf01_basic_sequence import build_basic_sequence_workflow
 from .wf02_sequential_executors import build_sequential_executors_workflow
-from .wf03_search_and_summarize import build_search_and_summarize_workflow
-from .wf04_search_with_checkpoint import build_search_with_checkpoint_workflow
-from .wf05_research_collector import build_research_collector_workflow
+from .wf03_conditional_branch import build_conditional_branching_workflow
+from .wf04_parallel_fanout import build_parallel_fanout_workflow
+from .wf05_loop_with_evaluation import build_loop_with_evaluation_workflow
+from .wf06_search_and_summarize import build_search_and_summarize_workflow
+from .wf07_search_with_hitl import build_search_with_hitl_workflow
+from .wf08_search_with_multiagent_and_tooling import build_search_with_multiagent_and_tooling_workflow
+
 
 logger = logging.getLogger("maf.workflow_factory")
 
@@ -34,13 +38,12 @@ class WorkflowFactory:
         builders = {
             "BasicSequence": lambda: build_basic_sequence_workflow(),
             "SequentialExecutors": lambda: build_sequential_executors_workflow(self._agent_factory),
+            "ConditionalBranching": lambda: build_conditional_branching_workflow(),
+            "ParallelFanOut": lambda: build_parallel_fanout_workflow(),
+            "LoopWithEvaluation": lambda: build_loop_with_evaluation_workflow(),
             "SearchAndSummarize": lambda: build_search_and_summarize_workflow(self._agent_factory),
-            "SearchWithCheckpoint": lambda: build_search_with_checkpoint_workflow(
-                self._agent_factory, self._checkpoint_storage
-            ),
-            "ResearchCollector": lambda: build_research_collector_workflow(
-                self._agent_factory, self._checkpoint_storage
-            ),
+            "SearchWithHitL": lambda: build_search_with_hitl_workflow(self._agent_factory, self._checkpoint_storage),
+            "SearchWithMultiAgentAndTooling": lambda: build_search_with_multiagent_and_tooling_workflow(self._agent_factory, self._checkpoint_storage),      
         }
 
         for name, builder in builders.items():

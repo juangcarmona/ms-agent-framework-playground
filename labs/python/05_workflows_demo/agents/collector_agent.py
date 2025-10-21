@@ -15,6 +15,7 @@ def build_collector_agent(chat_client):
             "- For each given URL, use 'fetch_webpage' to get the full page content.\n"
             "- Create a clean Markdown version starting with the URL on the first line.\n"
             "- Add a '# TL;DR' section with a deep, factual summary.\n"
+            "- Then include the original content converted to Markdown format.\n"
             "- Write the result to a .md file inside the provided folder using 'write_file'.\n"
             "Ensure filenames are unique and derived from the page title or slug.\n"
             "Return a list of processed filenames or URLs once done."

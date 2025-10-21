@@ -1,19 +1,6 @@
 version: "3.9"
 
 services:
-  # filesystem:
-  #   image: mcp/filesystem:latest
-  #   container_name: mcp_filesystem
-  #   # mount host folder X:\mnt into container as /projects/mnt
-  #   volumes:
-  #     - "X:/mnt:/projects/mnt:rw"
-  #   # command: pass the root path(s) that the server allows
-  #   command: [ "/projects/mnt" ]
-  #   # environment or other flags if needed
-  #   # optionally restrict to read-only: use :ro instead of :rw
-  #   # restart policy optional
-  #   restart: unless-stopped
-
   gateway:
     image: docker/mcp-gateway    
     container_name: mcp_gateway

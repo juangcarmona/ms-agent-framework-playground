@@ -127,7 +127,7 @@ class SummarizerExecutor(Executor):
 
 # ---------- 4) Workflow builder ----------
 
-def build_search_with_checkpoint_workflow(factory: AgentFactory, checkpoint_storage):
+def build_search_with_hitl_workflow(factory: AgentFactory, checkpoint_storage):
     entry = InputToChat(id="input_to_chat")
 
     # Agentic executors

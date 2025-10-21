@@ -12,7 +12,7 @@ logger = logging.getLogger("maf.wf05")
 
 
 # ------------------------------------------------------------
-# 1️⃣ Input node
+# Input node
 # ------------------------------------------------------------
 class InputToChat(Executor):
     @handler
@@ -23,7 +23,7 @@ class InputToChat(Executor):
 
 
 # ------------------------------------------------------------
-# 2️⃣ Title generation
+# Title generation
 # ------------------------------------------------------------
 class TitleGeneratorExecutor(Executor):
     def __init__(self, factory: AgentFactory, id="title_generator"):
@@ -41,7 +41,7 @@ class TitleGeneratorExecutor(Executor):
 
 
 # ------------------------------------------------------------
-# 3️⃣ Folder creation
+# Folder creation
 # ------------------------------------------------------------
 class FolderCreatorExecutor(Executor):
     def __init__(self, factory: AgentFactory, id="folder_creator"):
@@ -61,7 +61,7 @@ class FolderCreatorExecutor(Executor):
 
 
 # ------------------------------------------------------------
-# 4️⃣ Search (DuckDuckGo MCP)
+# Search (DuckDuckGo MCP)
 # ------------------------------------------------------------
 class SearchExecutor(Executor):
     def __init__(self, factory: AgentFactory, id="search_agent"):
@@ -81,7 +81,7 @@ class SearchExecutor(Executor):
 
 
 # ------------------------------------------------------------
-# 5️⃣ Collect, summarize, and save results
+# Collect, summarize, and save results
 # ------------------------------------------------------------
 class CollectorExecutor(Executor):
     def __init__(self, factory: AgentFactory, id="collector_agent"):
@@ -109,7 +109,7 @@ class CollectorExecutor(Executor):
 
 
 # ------------------------------------------------------------
-# 6️⃣ Folder synthesis
+# Folder synthesis
 # ------------------------------------------------------------
 class FolderSummarizerExecutor(Executor):
     def __init__(self, factory: AgentFactory, id="research_aggregator"):
@@ -131,9 +131,9 @@ class FolderSummarizerExecutor(Executor):
 
 
 # ------------------------------------------------------------
-# 7️⃣ Workflow definition
+# Workflow definition
 # ------------------------------------------------------------
-def build_research_collector_workflow(factory: AgentFactory, checkpoint_storage):
+def build_search_with_multiagent_and_tooling_workflow(factory: AgentFactory, checkpoint_storage):
     entry = InputToChat(id="input_to_chat")
     title = TitleGeneratorExecutor(factory=factory)
     folder = FolderCreatorExecutor(factory=factory)
