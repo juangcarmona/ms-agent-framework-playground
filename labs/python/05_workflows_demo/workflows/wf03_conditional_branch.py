@@ -123,5 +123,5 @@ def build_conditional_branching_workflow() -> WorkflowBuilder:
         .build()
     )
 
-    workflow.id = "ConditionalBranching"
+    workflow.id = "03CondBranch"
     return workflow

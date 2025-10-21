@@ -1,5 +1,7 @@
 # main.py
 
+
+from logger import get_logger
 from agent_framework.devui import DevServer
 from config import DEVUI_HOST, DEVUI_PORT, MCP_GATEWAY_URL
 import asyncio
@@ -10,6 +12,9 @@ from persistence.checkpoint_storage_factory import CheckpointStorageFactory
 from tools import mcp_tools
 from tools.mcp_gateway_client import MCPGatewayClient
 from workflows.workflow_factory import WorkflowFactory
+
+
+logger = get_logger("maf.console")
 
 async def main():
     

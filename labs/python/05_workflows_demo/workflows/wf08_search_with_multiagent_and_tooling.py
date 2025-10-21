@@ -1,4 +1,3 @@
-import logging
 from agent_framework import (
     ChatMessage,
     Executor,
@@ -7,8 +6,9 @@ from agent_framework import (
     handler,
 )
 from agents import AgentFactory
+from logger import get_logger
 
-logger = logging.getLogger("maf.wf05")
+logger = get_logger("maf.wf08_search_multiagent_tooling")
 
 
 # ------------------------------------------------------------
@@ -153,5 +153,5 @@ def build_search_with_multiagent_and_tooling_workflow(factory: AgentFactory, che
     )
 
     wf = builder.build()
-    wf.id = "ResearchCollector"
+    wf.id = "08MagSearchTools"
     return wf

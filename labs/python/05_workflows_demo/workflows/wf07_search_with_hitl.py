@@ -1,4 +1,3 @@
-import logging
 from dataclasses import dataclass
 from agent_framework import (
     ChatMessage,
@@ -13,7 +12,9 @@ from agent_framework import (
 )
 from agents import AgentFactory
 
-logger = logging.getLogger("maf.wf04")
+from logger import get_logger
+
+logger = get_logger("maf.wf04")
 
 
 # ---------- 1) Base executors ----------
@@ -152,5 +153,5 @@ def build_search_with_hitl_workflow(factory: AgentFactory, checkpoint_storage):
     )
 
     wf = builder.build()
-    wf.id = "SearchWithCheckpoint"
+    wf.id = "07SearchHITL"
     return wf

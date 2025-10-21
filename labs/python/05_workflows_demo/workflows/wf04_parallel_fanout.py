@@ -1,16 +1,11 @@
-# workflows/wf03_parallel_fanout.py
-
 from agent_framework import Executor, WorkflowContext, WorkflowBuilder, handler
-
 
 # --- Fan-out entry node -------------------------------------------------
 class FanOutDispatcher(Executor):
     @handler
     async def dispatch(self, text: str, ctx: WorkflowContext[str]) -> None:
         print(f"[FanOutDispatcher] Dispatching '{text}' to parallel branches...")
-        # Fan-out: send the same message to multiple downstream executors
-        await ctx.send_message(text)  # framework handles multiple outgoing edges
-
+        await ctx.send_message(text)
 
 # --- Branch 1 -----------------------------------------------------------
 class UpperCaseExecutor(Executor):
@@ -20,7 +15,6 @@ class UpperCaseExecutor(Executor):
         print(f"[UpperCaseExecutor] -> {result}")
         await ctx.send_message(result)
 
-
 # --- Branch 2 -----------------------------------------------------------
 class ReverseTextExecutor(Executor):
     @handler
@@ -29,40 +23,35 @@ class ReverseTextExecutor(Executor):
         print(f"[ReverseTextExecutor] -> {result}")
         await ctx.send_message(result)
 
-
 # --- Aggregator ---------------------------------------------------------
 class AggregatorExecutor(Executor):
-    def __init__(self, expected_count: int = 2, id="aggregator"):
-        super().__init__(id=id)
-        self._results: list[str] = []
-        self._expected = expected_count
-
+    """
+    Proper fan-in aggregator: receives a list[str] built automatically by the framework
+    when multiple incoming edges converge.
+    """
     @handler
-    async def collect(self, text: str, ctx: WorkflowContext[str]) -> None:
-        self._results.append(text)
-        print(f"[AggregatorExecutor] Received {len(self._results)}/{self._expected}")
-        if len(self._results) == self._expected:
-            merged = " | ".join(self._results)
-            print(f"[AggregatorExecutor] Aggregated -> {merged}")
-            await ctx.yield_output(merged)
-
+    async def aggregate(self, results: list[str], ctx: WorkflowContext[str]) -> None:
+        print(f"[AggregatorExecutor] Received all branch results: {results}")
+        merged = " | ".join(results)
+        print(f"[AggregatorExecutor] Aggregated -> {merged}")
+        await ctx.yield_output(merged)
 
 # --- Workflow definition ------------------------------------------------
 def build_parallel_fanout_workflow() -> WorkflowBuilder:
     dispatcher = FanOutDispatcher(id="dispatcher")
     upper = UpperCaseExecutor(id="upper")
     reverse = ReverseTextExecutor(id="reverse")
-    aggregator = AggregatorExecutor(expected_count=2, id="aggregator")
+    aggregator = AggregatorExecutor(id="aggregator")
 
     workflow = (
         WorkflowBuilder()
         .set_start_executor(dispatcher)
         # fan-out: dispatcher → upper, dispatcher → reverse
         .add_fan_out_edges(dispatcher, [upper, reverse])
-        # fan-in: upper → aggregator, reverse → aggregator
+        # fan-in: collect both results into list[str]
         .add_fan_in_edges([upper, reverse], aggregator)
         .build()
     )
 
-    workflow.id = "ParallelFanOut"
+    workflow.id = "04ParFanOut"
     return workflow

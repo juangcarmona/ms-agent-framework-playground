@@ -29,5 +29,5 @@ def build_basic_sequence_workflow() -> WorkflowBuilder:
         .add_edge(upper, reverse)
         .build()
     )
-    workflow.id = "BasicSequence"
+    workflow.id = "01BSequence"
     return workflow

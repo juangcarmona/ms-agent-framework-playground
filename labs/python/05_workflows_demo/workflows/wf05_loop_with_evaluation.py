@@ -1,59 +1,63 @@
-from agent_framework import Executor, WorkflowContext, WorkflowBuilder, WorkflowOutputEvent, handler
+import asyncio
+from agent_framework import Executor, WorkflowContext, WorkflowBuilder, handler
+from logger import get_logger
 
-# ------------------------------------------------------------
-# Step 1. Transformation logic
-# ------------------------------------------------------------
+logger = get_logger("maf.wf05")
+
+class LoopDispatcher(Executor):
+    @handler
+    async def dispatch(self, text: str, ctx: WorkflowContext[str]) -> None:
+        logger.info(f"Dispatching '{text}' to loop...")
+        await ctx.send_message(text)
+
 class TransformExecutor(Executor):
     @handler
-    async def transform(self, text: str, ctx: WorkflowContext[str]) -> None:
-        new_text = text + "!"
-        print(f"[TransformExecutor] '{text}' -> '{new_text}'")
+    async def transform(self, data: str, ctx: WorkflowContext[str]) -> None:
+        new_text = data + "!"
+        logger.info(f"[TransformExecutor] '{data}' -> '{new_text}'")
+        # Let's wait a bit to simulate processing time
+        await asyncio.sleep(0.2)
         await ctx.send_message(new_text)
 
 
-# ------------------------------------------------------------
-# Step 2. Judge if the condition is satisfied
-# ------------------------------------------------------------
 class JudgeExecutor(Executor):
     @handler
-    async def evaluate(self, text: str, ctx: WorkflowContext[str]) -> None:
+    async def evaluate(self, text: str, ctx: WorkflowContext[str | dict]) -> None:
         if len(text) < 10:
-            print(f"[JudgeExecutor] '{text}' too short → loop again")
-            # send message back to Transform (loop)
-            await ctx.send_message(("continue", text))
+            logger.info(f"'{text}' too short → loop again")
+            await ctx.send_message(text)  # str
         else:
-            print(f"[JudgeExecutor] '{text}' long enough → end")
-            await ctx.send_message(("done", text))
+            logger.info(f"'{text}' long enough → end")
+            await ctx.send_message({"action": "done", "text": text})  # dict
 
 
-# ------------------------------------------------------------
-# Step 3. Output result
-# ------------------------------------------------------------
 class OutputExecutor(Executor):
     @handler
-    async def finish(self, text: str, ctx: WorkflowContext[str]) -> None:
-        print(f"[OutputExecutor] Final result: '{text}'")
-        await ctx.yield_output(text)
+    async def finish(self, data: str | dict, ctx: WorkflowContext[str]) -> None:
+        if isinstance(data, dict):
+            logger.info(f"Final result: '{data['text']}'")
+            await ctx.yield_output(data["text"])
+        else:
+            # Shouldn't happen under normal conditions
+            logger.warning(f"Unexpected non-dict input: {data}")
+            await ctx.yield_output(data)
 
 
-# ------------------------------------------------------------
-# Workflow definition
-# ------------------------------------------------------------
 def build_loop_with_evaluation_workflow() -> WorkflowBuilder:
+    dispatcher = LoopDispatcher(id="dispatcher")
     transform = TransformExecutor(id="transform")
     judge = JudgeExecutor(id="judge")
     output = OutputExecutor(id="output")
 
-    workflow = (
+    wf = (
         WorkflowBuilder()
-        .set_start_executor(transform)
-        # Main loop edges
+        .set_start_executor(dispatcher)
+        .add_edge(dispatcher, transform)
         .add_edge(transform, judge)
-        # Conditional edges based on tuple[0] value
-        .add_edge(judge, transform, condition=lambda signal: signal[0] == "continue")
-        .add_edge(judge, output, condition=lambda signal: signal[0] == "done")
+        .add_edge(judge, transform, condition=lambda d: isinstance(d, str))
+        .add_edge(judge, output, condition=lambda d: isinstance(d, dict) and d.get("action") == "done")
         .build()
     )
 
-    workflow.id = "LoopWithEvaluation"
-    return workflow
+    wf.id = "05LoopEval"
+    return wf

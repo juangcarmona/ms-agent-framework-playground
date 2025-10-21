@@ -64,5 +64,5 @@ def build_sequential_executors_workflow(factory: AgentFactory):
         .add_edge(general, summarizer)
         .build()
     )
-    workflow.id = "SequentialExecutors"
+    workflow.id = "02AgSequence"
     return workflow
