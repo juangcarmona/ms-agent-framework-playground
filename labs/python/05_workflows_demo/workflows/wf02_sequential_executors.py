@@ -1,3 +1,4 @@
+# workflows/wf02_sequential_executors.py
 """
 Workflow with sequential executors wrapping different agents.
 Each executor processes the output of the previous one.
@@ -53,7 +54,6 @@ class SummarizerExecutor(Executor):
 # ------------------------------------------------------------
 def build_sequential_executors_workflow(factory: AgentFactory):
     entry = InputToChat(id="input_to_chat")
-
     general = GeneralExecutor(factory=factory, id="general_agent")
     summarizer = SummarizerExecutor(factory=factory, id="summarizer")
 

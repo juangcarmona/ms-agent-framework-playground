@@ -50,7 +50,7 @@
       "cwd": "${workspaceFolder}",
       "envFile": "${workspaceFolder}/.env",
       "justMyCode": true,
-      "args": ["--wf", "SearchWithCheckpoint"]
+      "args": ["--wf", "07SearchHITL"]
     },
     {
       "name": "Lab P05 - Research Collector",

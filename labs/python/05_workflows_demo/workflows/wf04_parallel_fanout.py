@@ -1,3 +1,4 @@
+# workflows/wf04_parallel_fanout.py
 from agent_framework import Executor, WorkflowContext, WorkflowBuilder, handler
 
 # --- Fan-out entry node -------------------------------------------------

@@ -1,5 +1,4 @@
-# workflows/simple_pipeline.py
-
+# workflows/wf01_basic_sequence.py
 from agent_framework import Executor, WorkflowContext, WorkflowOutputEvent, WorkflowBuilder, handler
 
 
