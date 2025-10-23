@@ -1,26 +1,24 @@
-# Microsoft Agent Framework Playground 🧠
-
+# Microsoft Agent Framework Playground 🧠  
 *Python + .NET Dual Runtime Labs*
 
-A hands-on playground to explore the **Microsoft Agent Framework (MAF)** — Microsoft’s open-source SDK and runtime for building **AI agents and multi-agent workflows** in **Python and .NET**.
+A hands-on playground to explore the **Microsoft Agent Framework (MAF)** — Microsoft’s open-source SDK and runtime for building **AI agents and multi-agent workflows** in **Python** and **.NET**.
 
-This repository provides parallel examples in both languages to demonstrate how MAF enables **local, offline AI experimentation** using **Docker Model Runner** or other OpenAI-compatible backends.
+> This repository provides parallel experiments in both runtimes, showing how MAF enables **local, offline, and privacy-first AI execution** powered by **Docker Model Runner (DMR)** but other **OpenAI-compatible local backends** such as `vLLM` or `llama.cpp` could be used instead.
 
 ---
 
 ## 🔰 Roadmap
 
-| Phase | Title                         | Goal / Outcome                                                                |
-| ----- | ----------------------------- | ----------------------------------------------------------------------------- |
-| 1     | **The Awakening**             | Minimal offline agent (Python & .NET).                                        |
-| 2     | **Chat Loop**                 | Add conversation context and simple memory.                                   |
-| 3     | **Agentic Loop**              | Demonstrate the Sense → Plan → Act → Reflect cycle.                           |
-| 4     | **Workflows**                 | Build multi-step agent orchestration using MAF graph workflows.               |
-| 5     | **Local LLM Integration**     | Demonstrated: run MAF agents on local models via Docker Model Runner or vLLM. |
-| 6     | **Observability & Logs**      | Add introspection: trace, debug, and visualize agent runs.                    |
-| 7     | **Multi-Agent Collaboration** | Manager–worker coordination patterns using workflow nodes.                    |
+| Phase | Title                             | Goal / Outcome                                                                                                                   | Article / Reference |
+| ----- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| 1     | **The Awakening**                 | Minimal offline agent (Python + . NET) running locally via Docker Model Runner.                                                 | [Run Agent Framework Locally](https://jgcarmona.com/run-agent-framework-locally/) |
+| 2     | **Chat Loop**                     | Adds conversation context and simple persistence (C# only).                                                                    | [Building a Local Chat Agent (.NET)](https://jgcarmona.com/building-local-chat-agent-microsoft-agent-framework-dotnet/) |
+| 3     | **Agentic Loop (SPAR)**           | Implements the Sense → Plan → Act → Reflect cycle and reasoning loop.                                                          | [Agentic Reasoning with MAF](https://jgcarmona.com/agentic-reasoning-with-microsoft-agent-framework/) · [AI Agents in a Nutshell](https://jgcarmona.com/ai-agents-nutshell/) |
+| 4     | **DevUI + MCP Gateway**           | Integrates MCP tools and Docker MCP Servers inside MAF DevUI using custom streaming gateway and client.                         | [MAF + DevUI + Docker MCP Gateway with DMR](https://jgcarmona.com/maf-devui-docker-mcp-gateway-dmr/) |
+| 5     | **Workflows and Persistence**     | Demonstrates multi-step agentic workflows with checkpointing (PostgreSQL), multi-agent collaboration and tool integration.     | [Building Agentic Workflows with MAF and DMR](https://jgcarmona.com/building-workflows-with-maf-and-dmr/) |
+| 6     | **Observability & Orchestration** | (Planned) Add logs, traces and visualization of workflow runs; define multi-agent coordination patterns and monitoring.         | — |
 
-Each lab contains Python and .NET implementations for parity and cross-language exploration.
+Each lab evolves incrementally, building on the previous one while maintaining parity between Python and .NET where possible.
 
 ---
 
@@ -28,75 +26,70 @@ Each lab contains Python and .NET implementations for parity and cross-language 
 
 ```bash
 labs/
-  python/
-    P01_the_awakening/
-      main.py
-      README.md
-    P02_chat_loop/
   dotnet/
-    P01.TheAwakening/
-      Program.cs
-      Msaf.P01.TheAwakening.csproj
-      README.md
-    P02.ChatLoop
+    01_the_awakening/
+    02_persistence/
+      Msaf02Persistence/
+    03_spar/
     Labs.Shared.Utils/
-      Labs.Shared.Utils.csproj
-    MicrosoftAgentFrameworkPlayground.sln
+
+  python/
+    01_the_awakening/
+    03_spar/
+    04_devui_with_mcp/
+    05_workflows_demo/
+      main.py
+      docker-compose.yml
+      agents/
+      persistence/
+      tools/
+      workflows/
 .env
 requirements.txt
+docker-compose.yml
 README.md
 ```
 
----
-
 ## 🔌 Requirements
 
-| Component    | Tooling                                                   |
-| ------------ | --------------------------------------------------------- |
-| Python       | ≥ 3.12 · `pip install agentframework`                     |
-| .NET         | ≥ 10.0 (pre-release) · `dotnet add package Microsoft.AgentFramework` |
-| Local Models | Docker Model Runner / vLLM / llama.server                       |
-| Optional     | `pip install agentframework-devui` (for visualization)    |
+| Component        | Tooling                                                              |
+| ---------------- | -------------------------------------------------------------------- |
+| **Python**       | ≥ 3.12 · `pip install agentframework` (ore requirements.txt per lab) |
+| **.NET**         | ≥ 10.0 (pre-release) · `dotnet add package Microsoft.AgentFramework` |
+| **Local Models** | Docker Model Runner / vLLM / llama.server                            |
+| **Optional**     | `pip install agentframework-devui` (for workflow visualization)      |
 
----
 
 ## 💬 Current Focus
 
-The current milestone covers:
+* Fully offline execution (no API keys, no cloud dependencies).
+* Multi-step workflows with PostgreSQL checkpoint storage.
+* Multi-agent collaboration via tools and MCP Gateway servers.
+* Integration of built-in filesystem and system tools.
+* Persistent MCP sessions and streaming support within DevUI.
 
-* Offline execution (local LLMs, no API keys)
-* Conversation context and summarization (WIP)
-* Single-agent reasoning and response streaming
-* Preparing for MAF **workflow orchestration** in upcoming labs
-
----
 
 ## 🔍 Upcoming Labs
 
-* **P03 Agentic Loop:** introduce the reasoning cycle.
-* **P04 Workflows:** explore graph-based orchestration.
-* **P05 Multi-Agent Collaboration:** run manager/worker patterns.
-* **P06 Observability:** logging, tracing, and metrics.
+| # | Title                         | Focus                                                            |
+| - | ----------------------------- | ---------------------------------------------------------------- |
+| 6 | **Observability & Logs**      | Introduce tracing, workflow introspection and run-time metrics.  |
+| 7 | **Multi-Agent Orchestration** | Explore manager/worker coordination patterns and shared context. |
 
 ---
 
 ## 📜 Articles
 
-| # | Title                                                          | Focus                            |
-| - | -------------------------------------------------------------- | -------------------------------- |
-| 1 | *[Microsoft Agent Framework Running Inside Docker Model Runner](https://jgcarmona.com/run-agent-framework-locally/)* | Offline runtime demo             |
-| 2 | *[Building a Local Chat Agent](https://jgcarmona.com/building-local-chat-agent-microsoft-agent-framework-dotnet/)*                                  | Memory & context                 |
-| 3 | *[Agentic Reasoning with MAF](https://jgcarmona.com/agentic-reasoning-with-microsoft-agent-framework/)*                                   | Sense–Plan–Act–Reflect           |
-| 4 | *[MAF + DevUI + Docker MCP Gateway](https://jgcarmona.com/maf-devui-docker-mcp-gateway-dmr/)*                             | DevUI + MCP intro (and workarounds) |
-| 5 | *MAF Workflows*                                                | Orchestration & multi-step tasks |
+| # | Title                                                                                                                   | Focus                                                     |
+| - | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 1 | [Run Agent Framework Locally](https://jgcarmona.com/run-agent-framework-locally/)                                       | Offline runtime setup with DMR (“The Awakening”).         |
+| 2 | [Building a Local Chat Agent (.NET)](https://jgcarmona.com/building-local-chat-agent-microsoft-agent-framework-dotnet/) | Conversation context and memory loop.                     |
+| 3 | [Agentic Reasoning with MAF](https://jgcarmona.com/agentic-reasoning-with-microsoft-agent-framework/)                   | SPAR loop – Sense, Plan, Act, Reflect.                    |
+| 4 | [Using MCP with Microsoft Agent Framework](https://jgcarmona.com/using-mcp-with-microsoft-agent-framework/)             | MCP StdioTools, local tool execution and lessons learned. |
+| 5 | [MAF + DevUI + Docker MCP Gateway with DMR](https://jgcarmona.com/maf-devui-docker-mcp-gateway-dmr/)                    | DevUI integration and MCP Gateway workarounds.            |
+| 6 | [Building Agentic Workflows with MAF and DMR](https://jgcarmona.com/building-workflows-with-maf-and-dmr/)               | Multi-step workflows, checkpointing and tool integration. |
 
 
 
----
-
-### © 2025 Juan G. Carmona - MAF Playground Series
-
-
-
-
+### © 2025 Juan G. Carmona — MAF Playground Series
 

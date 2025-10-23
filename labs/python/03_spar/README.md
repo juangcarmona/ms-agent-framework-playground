@@ -15,8 +15,8 @@ with real **Model Context Protocol (MCP)** tools — **DuckDuckGo** and **Fetch 
 The agent perceives, decides, acts, and verifies its own reasoning (see [AI Agents in a Nutshell](https://jgcarmona.com/ai-agents-nutshell/)) all **locally**. No API keys. No cloud. No tracking.
 
 > **UPDATE (14 Oct 2025)**
-> If your reasoning loops stop early or truncate mid-stream, DMR’s default context window (4 K tokens) is the culprit.
-> 👉 See: [**How to Change Docker Model Runner Context Size — The Only Working Hack**](https://jgcarmona.com/change-dmr-context-size/)
+> If your reasoning loops stop early or truncate mid-stream, DMR’s default context window (4K tokens) is the culprit.
+> See this tip: [**How to Change Docker Model Runner Context Size — The Only Working Hack**](https://jgcarmona.com/change-dmr-context-size/)
 > This tweak lets you push models like `ai/gpt-oss` to 128 K tokens and beyond.
 
 > **NOTE 2:**
