@@ -9,6 +9,10 @@
   ./set-model-context-size.ps1 --model ai/gemma3:12B --tokens 32768
 #>
 
+# I KEEP THIS FILE FOR LEARNING PURPOSES ONLY. USE THIS COMMAND INSTEAD:
+# docker model configure --context-size=131072 ai/gpt-oss
+# with your actual model name and desired context size.
+
 param(
   [Alias("m")]
   [string]$Model,
